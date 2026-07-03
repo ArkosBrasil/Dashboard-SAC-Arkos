@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Arkos | Dashboard SAC</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.3/chart.umd.min.js"></script>
 <style>
 :root{
   --bg:#0a0f1e;--bg2:#0f172a;--bg3:#1e293b;--b2:#334155;
@@ -250,11 +249,11 @@ tr:nth-child(even) td{background:var(--bg)}
       <!-- Charts -->
       <div class="g3">
         <div class="card"><div class="ctitle">Por Ocorrência</div>
-          <canvas id="cocc" height="185"></canvas>
+          <div id="cocc" style="width:100%;max-height:185px"></div>
           <div id="locc" style="display:flex;flex-wrap:wrap;gap:4px 8px;justify-content:center;margin-top:7px"></div>
         </div>
         <div class="card"><div class="ctitle">Por Produto</div>
-          <canvas id="cprd" height="185"></canvas>
+          <div id="cprd" style="width:100%;max-height:185px"></div>
           <div id="lprd" style="display:flex;flex-wrap:wrap;gap:4px 8px;justify-content:center;margin-top:7px"></div>
         </div>
         <div class="card">
@@ -594,8 +593,8 @@ function render() {
     '<div class="card" style="border-top:3px solid var(--pu)"><div class="klbl">Custo efetivo</div><div class="kval" style="color:var(--pu);font-size:18px">'+fm(custo)+'</div><div class="ksub">bonif. + MO + frete</div></div>';
 
   // Donuts
-  renderDonut('cocc','locc',countBy(fil,'occ'),OCC_COR,'CH_OCC');
-  renderDonut('cprd','lprd',countBy(fil,'produto'),PRD_COR,'CH_PRD');
+  renderDonut('cocc','locc',countBy(fil,'occ'),OCC_COR);
+  renderDonut('cprd','lprd',countBy(fil,'produto'),PRD_COR);
 
   // Canal + Status
   var canais=countBy(fil,'canal');
@@ -763,27 +762,38 @@ function renderNPS() {
     '</div>';
 }
 
-// ════ DONUTS ════
+// ════ DONUTS — SVG PURO (sem dependência externa) ════
 function countBy(arr,key){
   var m={};
   arr.forEach(function(r){if(r[key])m[r[key]]=(m[r[key]]||0)+1;});
   return Object.entries(m).sort(function(a,b){return b[1]-a[1]});
 }
-function renderDonut(cid,lid,data,cors,chVar){
-  var canvas=document.getElementById(cid); if(!canvas) return;
-  if(window[chVar]){window[chVar].destroy();}
+function renderDonut(cid,lid,data,cors){
+  var container=document.getElementById(cid); if(!container) return;
   var labels=data.map(function(d){return d[0]});
   var values=data.map(function(d){return d[1]});
   var total=values.reduce(function(s,v){return s+v},0);
-  window[chVar]=new Chart(canvas,{
-    type:'doughnut',
-    data:{labels:labels,datasets:[{data:values,backgroundColor:cors.slice(0,labels.length),borderWidth:0}]},
-    options:{cutout:'64%',plugins:{
-      legend:{display:false},
-      tooltip:{callbacks:{label:function(c){return c.label+': '+c.raw+' ('+Math.round(c.raw/total*100)+'%)'}},
-        backgroundColor:'#0f172a',borderColor:'#1e293b',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8'}
-    }}
+  if(total===0){container.innerHTML='<div style="text-align:center;color:var(--t3);padding:40px;font-size:12px">Sem dados</div>';return;}
+
+  function pt(cx,cy,r,deg){
+    var rad=(deg-90)*Math.PI/180;
+    return {x:cx+r*Math.cos(rad), y:cy+r*Math.sin(rad)};
+  }
+  function arc(cx,cy,ro,ri,a1,a2){
+    var p1=pt(cx,cy,ro,a2),p2=pt(cx,cy,ro,a1),p3=pt(cx,cy,ri,a1),p4=pt(cx,cy,ri,a2);
+    var lg=a2-a1>180?1:0;
+    return 'M '+p1.x+' '+p1.y+' A '+ro+' '+ro+' 0 '+lg+' 0 '+p2.x+' '+p2.y+
+           ' L '+p3.x+' '+p3.y+' A '+ri+' '+ri+' 0 '+lg+' 1 '+p4.x+' '+p4.y+' Z';
+  }
+
+  var cx=100,cy=100,ro=82,ri=52,cur=0,paths='';
+  values.forEach(function(v,i){
+    var sl=v/total*359.99;
+    paths+='<path d="'+arc(cx,cy,ro,ri,cur,cur+sl)+'" fill="'+cors[i%cors.length]+'" stroke="#0f172a" stroke-width="1.5"><title>'+labels[i]+': '+v+' ('+Math.round(v/total*100)+'%)</title></path>';
+    cur+=sl;
   });
+
+  container.innerHTML='<svg viewBox="0 0 200 200" style="width:100%;max-height:185px;display:block">'+paths+'</svg>';
   document.getElementById(lid).innerHTML=labels.map(function(l,i){
     return '<span style="font-size:11px;color:#cbd5e1;display:flex;align-items:center;gap:3px">'+
       '<span style="width:9px;height:9px;border-radius:2px;background:'+cors[i%cors.length]+';display:inline-block"></span>'+
