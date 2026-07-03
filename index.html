@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Arkos | Dashboard SAC</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.3/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#0a0f1e;--bg2:#0f172a;--bg3:#1e293b;--b2:#334155;
+  --tx:#e2e8f0;--t2:#94a3b8;--t3:#64748b;
+  --ac:#6366f1;--gr:#22c55e;--or:#f97316;--yw:#f59e0b;--rd:#ef4444;--pu:#a855f7;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+input,select,button{font-family:inherit}
+button{cursor:pointer}
+
+/* ── TELAS ── */
+.tela{display:none}
+.tela.ativa{display:block}
+
+/* ── LOGIN ── */
+#tela-login{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.login-box{background:var(--bg2);border:1px solid var(--bg3);border-radius:16px;padding:40px;width:100%;max-width:360px;text-align:center}
+.login-logo{height:30px;margin-bottom:28px;opacity:.9}
+.login-title{font-size:16px;font-weight:700;margin-bottom:4px}
+.login-sub{font-size:12px;color:var(--t3);margin-bottom:28px}
+.pw-field{width:100%;background:var(--bg3);border:1px solid var(--b2);color:var(--tx);border-radius:8px;padding:11px 14px;font-size:15px;outline:none;letter-spacing:4px;text-align:center;margin-bottom:14px}
+.pw-field:focus{border-color:var(--ac)}
+.btn-ac{background:var(--ac);color:#fff;border:none;border-radius:8px;padding:11px 24px;font-size:14px;font-weight:600;width:100%}
+.btn-ac:hover{opacity:.88}
+.pw-err{color:var(--rd);font-size:12px;margin-top:10px;display:none}
+
+/* ── APP ── */
+#tela-app{display:none}
+
+/* ── HEADER ── */
+.hdr{background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 100%);border-bottom:1px solid var(--bg3);padding:13px 22px;display:flex;align-items:center;justify-content:space-between}
+.hdr-esq .htitle{font-size:18px;font-weight:700}
+.hdr-esq .hsub{font-size:11px;color:var(--t3);margin-top:2px}
+.hdr-esq .hstats{display:flex;gap:14px;margin-top:5px}
+.s-gr{font-size:12px;color:var(--gr);font-weight:700}
+.s-ab{font-size:12px;color:var(--t2)}
+.hdr-dir{display:flex;align-items:center;gap:10px}
+.hdr-logo{height:30px;opacity:.9}
+.btn-refresh{background:var(--bg3);border:1px solid var(--b2);color:var(--t2);border-radius:6px;padding:4px 11px;font-size:12px;display:flex;align-items:center;gap:5px}
+.btn-refresh:hover{color:var(--tx)}
+.btn-cfg{background:transparent;border:none;color:var(--t3);font-size:16px;padding:4px}
+.btn-cfg:hover{color:var(--t2)}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:4px;padding:10px 22px 0;border-bottom:1px solid var(--bg3)}
+.tab{padding:7px 18px;border-radius:8px 8px 0 0;border:none;background:transparent;color:var(--t3);font-size:13px;font-weight:600;border-bottom:2px solid transparent;transition:all .2s}
+.tab.on{background:var(--bg3);color:var(--tx);border-bottom-color:var(--ac)}
+
+/* ── CONTEÚDO ── */
+.main{padding:16px 22px}
+.secao{display:none}
+.secao.on{display:block}
+
+/* ── CONTROLES ── */
+.ctrls{display:flex;align-items:center;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.mbtn{padding:5px 13px;border-radius:20px;border:1px solid var(--bg3);font-size:12px;font-weight:600;background:transparent;color:var(--t3)}
+.mbtn.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.navbtn{background:var(--bg3);border:1px solid var(--b2);color:var(--t2);border-radius:6px;width:26px;height:26px;font-size:13px}
+.plabel{font-size:12px;color:var(--t2);min-width:170px;text-align:center}
+.dinput{background:var(--bg3);border:1px solid var(--b2);color:var(--tx);border-radius:6px;padding:4px 8px;font-size:12px;outline:none;color-scheme:dark}
+.sep{font-size:11px;color:var(--t3)}
+.clbtn{background:transparent;border:1px solid var(--b2);color:var(--t3);border-radius:6px;padding:4px 9px;font-size:11px}
+.filtros{margin-left:auto;display:flex;gap:5px}
+.sel{background:var(--bg3);border:1px solid var(--b2);color:var(--tx);border-radius:6px;padding:4px 8px;font-size:12px;outline:none}
+#nav-wrap,#date-wrap{display:none;align-items:center;gap:5px}
+
+/* ── GRIDS ── */
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-bottom:11px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:11px}
+
+/* ── CARD ── */
+.card{background:var(--bg2);border:1px solid var(--bg3);border-radius:12px;padding:15px}
+.ctitle{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:11px}
+
+/* ── KPI ── */
+.kval{font-size:26px;font-weight:700;line-height:1.1;margin-bottom:2px}
+.klbl{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.8px}
+.ksub{font-size:11px;color:var(--t2);margin-top:3px}
+
+/* ── BADGE ── */
+.badge{border-radius:20px;padding:2px 9px;font-size:11px;font-weight:700;white-space:nowrap;display:inline-block}
+
+/* ── AGING ── */
+.arow{margin-bottom:9px}
+.ahdr{display:flex;justify-content:space-between;margin-bottom:3px}
+.albl{font-size:12px;color:var(--t2)}
+.acnt{font-size:13px;font-weight:700}
+.atrack{background:var(--bg3);border-radius:4px;height:7px}
+.afill{height:7px;border-radius:4px;transition:width .4s}
+
+/* ── ALERT ── */
+.alerta{background:#450a0a;border:1px solid var(--rd);border-radius:8px;padding:11px 14px;margin-top:10px}
+.alerta-t{color:#f87171;font-weight:700;font-size:12px;margin-bottom:5px}
+.alerta-i{font-size:11px;color:#fca5a5;margin-bottom:2px}
+
+/* ── CANAL/STATUS ── */
+.crow{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+.cdot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.clabel{font-size:12px;color:var(--t2);flex:1}
+.cval{font-weight:700;font-size:13px}
+.ctrack{width:55px;background:var(--bg3);border-radius:4px;height:5px}
+.cfill{height:5px;border-radius:4px}
+
+/* ── TREND ── */
+.trend{display:flex;align-items:flex-end;gap:3px;height:130px;margin-top:8px}
+.tmes{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1}
+.tbars{display:flex;gap:2px;align-items:flex-end;height:110px}
+.tbar{width:13px;border-radius:3px 3px 0 0}
+.tmlbl{font-size:10px;color:var(--t3)}
+.tleg{display:flex;gap:12px;margin-top:8px}
+.tli{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--t2)}
+.tld{width:8px;height:8px;border-radius:2px}
+
+/* ── TABELA ── */
+.twrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{padding:7px 9px;text-align:left;color:var(--t3);font-weight:600;border-bottom:1px solid var(--bg3);white-space:nowrap;font-size:11px;user-select:none}
+th.sorted{color:var(--ac)}
+th{cursor:pointer}
+td{padding:7px 9px;border-bottom:1px solid var(--bg);color:#cbd5e1;vertical-align:middle;font-size:12px}
+tr:hover td{background:var(--bg3)!important}
+tr:nth-child(even) td{background:var(--bg)}
+.thdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+.busca{background:var(--bg3);border:1px solid var(--b2);color:var(--tx);border-radius:6px;padding:5px 11px;font-size:12px;outline:none;width:200px}
+
+/* ── NPS ── */
+.nps-big{font-size:54px;font-weight:800;line-height:1}
+.escala{display:flex;height:20px;border-radius:8px;overflow:hidden;margin-bottom:10px}
+.ez{flex:1;display:flex;align-items:center;justify-content:center;font-size:8px;color:rgba(255,255,255,.8);font-weight:600;text-align:center;padding:0 2px}
+.stars{display:flex;gap:5px;justify-content:center;margin:10px 0}
+.star{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.ncard{background:var(--bg);border:1px solid var(--bg3);border-radius:10px;padding:14px 16px;margin-bottom:10px}
+.nchdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px}
+.nc{font-weight:700;font-size:14px}
+.nm{font-size:11px;color:var(--t3);margin-top:2px}
+.ncmt{font-size:13px;color:var(--t2);line-height:1.6;font-style:italic;border-left:3px solid var(--bg3);padding-left:12px;margin-top:4px}
+.nscs{display:flex;align-items:center;gap:8px}
+.nbn{text-align:center}
+.nbn .num{font-size:22px;font-weight:800;line-height:1}
+.nbn .lbl{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px}
+
+/* ── MODAL CONFIG ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center}
+.overlay.ativa{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--bg3);border-radius:14px;padding:28px;width:100%;max-width:500px}
+.modal-title{font-size:15px;font-weight:700;margin-bottom:6px}
+.modal-sub{font-size:12px;color:var(--t3);margin-bottom:20px;line-height:1.6}
+.flabel{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px}
+.finput{width:100%;background:var(--bg);border:1px solid var(--b2);color:var(--tx);border-radius:8px;padding:8px 12px;font-size:12px;outline:none;margin-bottom:14px}
+.finput:focus{border-color:var(--ac)}
+.modal-row{display:flex;gap:8px;margin-top:4px}
+.btn-sec{background:transparent;border:1px solid var(--b2);color:var(--t2);border-radius:8px;padding:9px 18px;font-size:13px;flex:1}
+.steps{background:var(--bg);border:1px solid var(--bg3);border-radius:8px;padding:14px;margin-bottom:18px;font-size:11px;color:var(--t2);line-height:2}
+.steps b{color:var(--ac)}
+
+@media(max-width:680px){
+  .g4{grid-template-columns:1fr 1fr}
+  .g3,.g2{grid-template-columns:1fr}
+  .filtros{margin-left:0;width:100%}
+}
+</style>
+</head>
+<body>
+
+<!-- ════ TELA LOGIN ════ -->
+<div id="tela-login">
+  <div class="login-box">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAABKCAYAAAABp2mGAAAGT0lEQVR4nO2d27KjOgxEza75/1/mvBxSIQFiy7q05F5PUzMZrJsbAcZs+763IK4G3gS/sbDjip5xNY81wtO4mnb3Hs+KqPj2gFLPEYyKiNjnf9L/KEBLGT+PUyHho4SdZciL1et5xv/3/zvkr7VgeUwssfPJoEjFw3rWj8FxvC5frQQranINOZ8EClU80fXcGkZNW8aha+5qCxbK5KogXCixRCEiHkg52FtcPXvG4dFPLcFCSuw7GYULNZYrgZqDiHqOPFF8+fmneHBkMtjYWh47K5MhB3vzv58Wwdf4Mx1WtDOjIHdb2WJZkYw5sLxMRInHad5KOywUZySg2Y5mDyLW68Qy5yCz7SPsrckEq0KAUHxAsWNlKuTAaqkBGvvoJaGVI3dnxc1wzMinLsf4ViBe9iLinYPj7yzG1arnWdvubFDxeUSwNIM8Etir31qtMvYiKpYZsTxhaTGag55XdiREnYR7xnz/jdTfrVewNAKqGUgN5zNTXaSk9Malcj3PiJZkbMlYkk5za62vw7JqEbWwbLPRWE2orC6dZshQz16d1uwYvbd8XuP8uuk+E7St+U6wypPZO5YZyTBBR8eaGc/6BK4Vi19+nv5NY+Hoz0EcqTixq/nTC1J3FVlXXqIVvcXQ00OKF0+CNZPcaBBs0KCKH6NY7K/EesZnu/nzizvBypzcAyRbJGS3XwrSvUikHEi7PKR49vDop+YlIVJyDxBt6iGr3bNYPaXyevrlAapdLlwJVqXktoZt2xXZ7NUCab1VtRxk67Ju0eiwMiQ3g42t5bFTG6RbEBlysMKl4SWfguW2mXwA6Lai22eFpVixnosx02EtGTCiSomzfiAr7EB64l2wVigeVJFFtcuK2Q3oVr0UnOUp5qP+h+iFtMPKnNzMtmdHY6dMz/cFM7BUPVutdCf9VC+4vekIVWt2saqeg3c0hdz9pHAIVvSyfG8q+ICMpkgdMGf3aL7XN4rX/vKtNd8vP5Nvsk9Cr0K1vL+SPQcouOwQwUtCgg4FpY/ILuvAvNv6GxygUvFU8qUqzJENv+b8bNzNRIsdVhycjM9U299qNUy6LQoWQQN947pV0BJzVeGiYBEUKm6+6I12/DSPpyJcI4LFYiJWsLZw0c7NlHBxWUMMnKCMQSZ6PxYxwukT9L2sfknISeMPL/1yYpW3ISFkh0Vm6DnzUpxqEdptrd5hEXv41K4eYd0WOyziwWchsuuqgcVHjB+7rdU7LJ79Y3B9YZaYY9FxXdbHiGCxwIg2FK5aaAvXV22s3mERDChcOqDEUFO4Tj5RsAgSKBOO6KB+qUjBImgg7vdO5lDb/WFlweLZHBuP/LAG/FDptv4GD8IEE09Yb/1k2ddOOvbe2todFskBRaseYsFcdeEoJ4Eed8XntpjwgpHXR1z2IidfSF7x2Y8Oi5eFRJut2b3CQc5knZPDtbHiJWHW5GZGS7yscrdSTaQ+gUgFa6UEE128RCv1xBwg+1wU74dl+e03FDLaXBHEfdtXqI30Ir7iJSHBgaI1RzZ7p/kUrMpdViZbV8Lyxnz6juKB0XouEQuNDiuDEGSwcXUkE2rVLiuDjSZcCRZK4WiBbBs5Y1F7rOdCV06a97AQnUS0iTxjcelSRbQ8369E9P9WsKbe9wEByRZiywrrs6S2oD3YmBrjqcPKKlrcDC4/KF1Waxj15CVWV+NE+37CallDVJKhgkumQBKt1uLqGaGmUTrY7ZdgaaxK9morERJL4qhUZxrjaN9o1/ZddKyeDkvjTGeVaApVbdC6rAP0erZ8Kqhhn/gYvdvLaH3t9f0YWe+REVx6t4qpXM8eC0Qlfqt0jCP7YWl/ovrqWJ/OW4uTxWe3iS5WOYqo57vfaRGxfMN1/ozedC+xvP9/KvlCZHjXAJpYZeHlm+QpYYXAVPCB6FChFir4cMfJN+myhswBymz7qljviJu5JmZtR/b9y7aZdVjZtr/NZi/xJWN9aNmL6PelTRoLRxGd/SSDjQSDDLViIa5Ift/aovXVnGMAtCduSEkgeUCt59ZsaxrB70f/tF/NQRGIjO09eSYin0h15GlLlM8/x7X4LuH7oN5KjVJcpBaRnUe0eHj43O2j9YdUvZymUBEPvE7GSPVs6fOwn15fftZewY6UULImmhM5Sz3P+jzt53+XG0jTFDa6HgAAAABJRU5ErkJggg==" class="login-logo" alt="Arkos">
+    <div class="login-title">Dashboard SAC / Pós-Vendas</div>
+    <div class="login-sub">Acesso restrito — equipe interna Arkos</div>
+    <input id="pw" type="password" class="pw-field" placeholder="••••••••"
+      onkeydown="if(event.key==='Enter'){entrar()}">
+    <button class="btn-ac" onclick="entrar()">Entrar</button>
+    <div id="pw-err" class="pw-err">Senha incorreta. Tente novamente.</div>
+  </div>
+</div>
+
+<!-- ════ TELA APP ════ -->
+<div id="tela-app">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-esq">
+      <div class="htitle">SAC / Pós-Vendas</div>
+      <div class="hsub" id="hsub">03/07/2026 · 78 casos cadastrados</div>
+      <div class="hstats">
+        <span class="s-gr" id="hres">—</span>
+        <span class="s-ab" id="hab">—</span>
+      </div>
+    </div>
+    <div class="hdr-dir">
+      <button class="btn-refresh" onclick="sincronizar()">&#8635; Sincronizar</button>
+      <button class="btn-cfg" onclick="abrirCfg()" title="Configurar URLs da planilha">&#9881;</button>
+      <img src="data:image/png;base64,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" class="hdr-logo" alt="Arkos">
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button id="tab-sac" class="tab on" onclick="setTab('sac')">Dashboard SAC</button>
+    <button id="tab-nps" class="tab" onclick="setTab('nps')">NPS</button>
+  </div>
+
+  <div class="main">
+
+    <!-- ── SEÇÃO SAC ── -->
+    <div id="sec-sac" class="secao on">
+
+      <!-- Controles -->
+      <div class="ctrls">
+        <button class="mbtn on" data-m="total"        onclick="setModo(this,'total')">Total</button>
+        <button class="mbtn"    data-m="trimestre"    onclick="setModo(this,'trimestre')">Trimestre</button>
+        <button class="mbtn"    data-m="mes"           onclick="setModo(this,'mes')">Mês</button>
+        <button class="mbtn"    data-m="semana"        onclick="setModo(this,'semana')">Semana</button>
+        <button class="mbtn"    data-m="personalizado" onclick="setModo(this,'personalizado')">&#128197; Personalizado</button>
+        <span id="nav-wrap">
+          <button class="navbtn" onclick="mudaOffset(1)">&#8249;</button>
+          <span class="plabel" id="plabel"></span>
+          <button class="navbtn" onclick="mudaOffset(-1)">&#8250;</button>
+        </span>
+        <span id="date-wrap">
+          <span class="sep">De</span>
+          <input type="date" id="dde" class="dinput" oninput="render()">
+          <span class="sep">até</span>
+          <input type="date" id="date" class="dinput" oninput="render()">
+          <button class="clbtn" onclick="limparDatas()">Limpar</button>
+        </span>
+        <div class="filtros">
+          <select id="fst" class="sel" onchange="render()">
+            <option value="">Todos os status</option>
+            <option>Resolvido</option><option>Em Andamento</option><option>Aguardando Cliente</option>
+          </select>
+          <select id="fpd" class="sel" onchange="render()"></select>
+          <select id="foc" class="sel" onchange="render()"></select>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="g4" id="kpis"></div>
+
+      <!-- Charts -->
+      <div class="g3">
+        <div class="card"><div class="ctitle">Por Ocorrência</div>
+          <canvas id="cocc" height="185"></canvas>
+          <div id="locc" style="display:flex;flex-wrap:wrap;gap:4px 8px;justify-content:center;margin-top:7px"></div>
+        </div>
+        <div class="card"><div class="ctitle">Por Produto</div>
+          <canvas id="cprd" height="185"></canvas>
+          <div id="lprd" style="display:flex;flex-wrap:wrap;gap:4px 8px;justify-content:center;margin-top:7px"></div>
+        </div>
+        <div class="card">
+          <div class="ctitle">Canal de Entrada</div>
+          <div id="canais"></div>
+          <div class="ctitle" style="margin-top:14px">Status</div>
+          <div id="statuses"></div>
+        </div>
+      </div>
+
+      <!-- Aging + Trend -->
+      <div class="g2">
+        <div class="card">
+          <div class="ctitle">Aging — em aberto · média <span id="amed">—</span> dias</div>
+          <div id="aging"></div>
+          <div id="alerta"></div>
+        </div>
+        <div class="card">
+          <div class="ctitle">Tendência — últimos 6 meses</div>
+          <div class="trend" id="trend"></div>
+          <div class="tleg">
+            <div class="tli"><div class="tld" style="background:var(--ac)"></div>Abertos</div>
+            <div class="tli"><div class="tld" style="background:var(--gr)"></div>Resolvidos</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabela -->
+      <div class="card">
+        <div class="thdr">
+          <div class="ctitle" id="ttitle">Casos</div>
+          <input class="busca" id="busca" placeholder="Buscar cliente, caso, produto..." oninput="render()">
+        </div>
+        <div class="twrap">
+          <table>
+            <thead><tr>
+              <th id="th-id"         onclick="sortBy('id')">#</th>
+              <th id="th-abertura"   onclick="sortBy('abertura')">Abertura</th>
+              <th id="th-cliente"    onclick="sortBy('cliente')">Cliente</th>
+              <th id="th-estado"     onclick="sortBy('estado')">UF</th>
+              <th id="th-produto"    onclick="sortBy('produto')">Produto</th>
+              <th id="th-occ"        onclick="sortBy('occ')">Ocorrência</th>
+              <th id="th-status"     onclick="sortBy('status')">Status</th>
+              <th id="th-dias"       onclick="sortBy('dias')" style="text-align:right">Dias</th>
+              <th id="th-valor"      onclick="sortBy('valor')" style="text-align:right">Vl. Pedido</th>
+              <th id="th-custo"      onclick="sortBy('custo')" style="text-align:right">Custo</th>
+            </tr></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /sec-sac -->
+
+    <!-- ── SEÇÃO NPS ── -->
+    <div id="sec-nps" class="secao">
+      <div id="nps-html"></div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /tela-app -->
+
+<!-- ════ MODAL CONFIG ════ -->
+<div id="overlay-cfg" class="overlay">
+  <div class="modal">
+    <div class="modal-title">Sincronização com Google Sheets</div>
+    <div class="modal-sub">Configure as URLs das abas publicadas para o dashboard buscar dados atualizados.</div>
+    <div class="steps">
+      <b>Como publicar:</b><br>
+      1. Google Sheets → <b>Arquivo → Compartilhar → Publicar na web</b><br>
+      2. Selecione a aba <b>📋 Casos</b> → formato <b>CSV</b> → Publicar → copie a URL<br>
+      3. Repita para a aba <b>📊 NPS</b>
+    </div>
+    <div class="flabel">URL CSV — aba "Casos"</div>
+    <input id="ucasos" type="text" class="finput" placeholder="https://docs.google.com/spreadsheets/d/.../pub?gid=...&output=csv">
+    <div class="flabel">URL CSV — aba "NPS"</div>
+    <input id="unps" type="text" class="finput" placeholder="https://docs.google.com/spreadsheets/d/.../pub?gid=...&output=csv">
+    <div id="cfg-msg" style="font-size:12px;color:var(--gr);display:none;margin-bottom:10px">URLs salvas!</div>
+    <div class="modal-row">
+      <button class="btn-sec" onclick="fecharCfg()">Cancelar</button>
+      <button class="btn-ac" style="flex:2" onclick="salvarCfg()">Salvar e sincronizar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════ SENHA ════
+const SENHA = 'arkos2026';
+function entrar() {
+  var v = document.getElementById('pw').value;
+  if (v === SENHA) {
+    document.getElementById('tela-login').style.display = 'none';
+    document.getElementById('tela-app').style.display = 'block';
+    iniciar();
+  } else {
+    document.getElementById('pw-err').style.display = 'block';
+    document.getElementById('pw').value = '';
+    document.getElementById('pw').focus();
+  }
+}
+
+// ════ DADOS BASE ════
+var CASOS = [
+  {id:1,pedido:"18671",abertura:"03/02/2026",cliente:"SÃO PAULO GOLF CLUB",estado:"SP",vendedor:"DAVI ALVES",produto:"Arkowood K",occ:"Empenamento",status:"Resolvido",dias:150,valor:180000,custo:25000,canal:"Formulário SAC"},
+  {id:2,pedido:"4379",abertura:"05/02/2026",cliente:"Danielle de Lima Carvalho",estado:"RJ",vendedor:"RAPHIS",produto:"Arkowood EP",occ:"Rachadura",status:"Em Andamento",dias:148,valor:41813,custo:16680,canal:"Formulário SAC"},
+  {id:3,pedido:"22815",abertura:"09/02/2026",cliente:"DYNAMICS METALURGICA LTDA",estado:"PR",vendedor:"SUNFIX",produto:"Arkowood K",occ:"Prod. Errado",status:"Resolvido",dias:144,valor:10332,custo:0,canal:"Kommo/CRM"},
+  {id:4,pedido:"4587",abertura:"11/02/2026",cliente:"HELIO HENRIQUE SETTE DA SILVA",estado:"SP",vendedor:"TATIANA ROCHA",produto:"Arkowood K",occ:"Desbotamento",status:"Aguardando Cliente",dias:142,valor:86000,custo:7204,canal:"Formulário SAC"},
+  {id:5,pedido:"20045",abertura:"12/02/2026",cliente:"CASA AVILA INVESTIMENTOS IMOB.",estado:"SP",vendedor:"SAMANTHA DUTRA",produto:"Arkowood A",occ:"Garantia Outros",status:"Resolvido",dias:141,valor:80912,custo:0,canal:"Kommo/CRM"},
+  {id:6,pedido:"9577",abertura:"12/02/2026",cliente:"HAROLDO LUÍS PESSOA PICANÇO",estado:"",vendedor:"EGYEDIO",produto:"Arkowood KP",occ:"Empenamento",status:"Em Andamento",dias:141,valor:72259,custo:19000,canal:"Formulário SAC"},
+  {id:7,pedido:"16393",abertura:"18/02/2026",cliente:"Marcelo Salles Oliveira",estado:"SP",vendedor:"TATIANA ROCHA",produto:"Arkodeck E",occ:"Empenamento",status:"Resolvido",dias:135,valor:270000,custo:0,canal:"Formulário SAC"},
+  {id:8,pedido:"21992",abertura:"19/02/2026",cliente:"Sunfix",estado:"PR",vendedor:"SUNFIX",produto:"Outro",occ:"Prod. Errado",status:"Resolvido",dias:134,valor:32000,custo:0,canal:"Kommo/CRM"},
+  {id:9,pedido:"18217",abertura:"19/02/2026",cliente:"Screeny Decor",estado:"RS",vendedor:"Screeny Decor",produto:"Arkodeck E",occ:"Prod. Errado",status:"Resolvido",dias:134,valor:58940,custo:0,canal:"Kommo/CRM"},
+  {id:10,pedido:"11446",abertura:"20/02/2026",cliente:"ONE DONATELLI EMPREENDIMENTO",estado:"SP",vendedor:"BRUNA CORREA",produto:"Arkowood K",occ:"Empenamento",status:"Resolvido",dias:133,valor:67010,custo:0,canal:"Formulário SAC"},
+  {id:11,pedido:"23287",abertura:"23/02/2026",cliente:"HUGO ALBERTO SEGRE JUNIOR",estado:"SP",vendedor:"SARAH JANCOVIC",produto:"Arkowood K",occ:"Prod. Errado",status:"Em Andamento",dias:130,valor:588,custo:0,canal:"Kommo/CRM"},
+  {id:12,pedido:"19921",abertura:"23/02/2026",cliente:"CARVALHO DANTAS LELIS E PALHARIS",estado:"GO",vendedor:"STERMAAN",produto:"Arkowood K",occ:"Manchado",status:"Resolvido",dias:130,valor:30240,custo:4000,canal:"Formulário SAC"},
+  {id:13,pedido:"7728",abertura:"23/02/2026",cliente:"CARLOS HENRIQUE KAIPPER",estado:"RS",vendedor:"Screeny Decor",produto:"Arkodeck E",occ:"Desbotamento",status:"Resolvido",dias:130,valor:3730,custo:0,canal:"Formulário SAC"},
+  {id:14,pedido:"18559",abertura:"23/02/2026",cliente:"ANGELA NERLY PEREIRA",estado:"PA",vendedor:"EGYEDIO",produto:"Arkowood KP",occ:"Desbotamento",status:"Resolvido",dias:130,valor:87040,custo:0,canal:"Formulário SAC"},
+  {id:15,pedido:"16564",abertura:"27/02/2026",cliente:"SPORTCO ACADEMIA LTDA",estado:"SP",vendedor:"SAMANTHA DUTRA",produto:"Thermowood",occ:"Empenamento",status:"Em Andamento",dias:126,valor:34265,custo:1171,canal:"Formulário SAC"},
+  {id:16,pedido:"12504",abertura:"02/03/2026",cliente:"FERNANDO MENDA TORNAIM",estado:"RS",vendedor:"Screeny Decor",produto:"Arkowood K",occ:"Empenamento",status:"Aguardando Cliente",dias:123,valor:75571,custo:11250,canal:"Formulário SAC"},
+  {id:17,pedido:"9847",abertura:"03/03/2026",cliente:"MARCELO MARQUES PINHEIRO",estado:"SP",vendedor:"GUILHERME MENDES",produto:"Arkodeck E",occ:"Desbotamento",status:"Aguardando Cliente",dias:122,valor:85000,custo:0,canal:"Formulário SAC"},
+  {id:18,pedido:"22419",abertura:"17/03/2026",cliente:"GOOD VIBEH COMERCIAL DE MODA LTDA",estado:"RJ",vendedor:"RAPHIS",produto:"Arkodeck E",occ:"Garantia Outros",status:"Resolvido",dias:108,valor:56400,custo:0,canal:"Formulário SAC"},
+  {id:19,pedido:"17280",abertura:"18/03/2026",cliente:"PERFECT WAVE POOL S.A",estado:"PR",vendedor:"TADEU",produto:"Arkodeck E",occ:"Rachadura",status:"Em Andamento",dias:107,valor:215337,custo:0,canal:"Formulário SAC"},
+  {id:20,pedido:"7983",abertura:"23/03/2026",cliente:"JULIANA ELISA ALVES MARIA FELDMAN",estado:"RJ",vendedor:"RAPHIS",produto:"Arkowood EP",occ:"Desbotamento",status:"Aguardando Cliente",dias:102,valor:511779,custo:91436,canal:"Formulário SAC"},
+  {id:21,pedido:"9677",abertura:"23/03/2026",cliente:"PADARIA SABOR DE PAO LTDA",estado:"RN",vendedor:"ECOGREEN",produto:"Arkowood KP",occ:"Desbotamento",status:"Aguardando Cliente",dias:102,valor:34837,custo:0,canal:"Formulário SAC"},
+  {id:22,pedido:"8884",abertura:"23/03/2026",cliente:"LORENA FURTADO ROBERTO BURITY",estado:"PB",vendedor:"ECOGREEN",produto:"Arkowood EP",occ:"Desbotamento",status:"Aguardando Cliente",dias:102,valor:69864,custo:91971,canal:"Formulário SAC"},
+  {id:23,pedido:"1919",abertura:"23/03/2026",cliente:"(sem nome)",estado:"PE",vendedor:"ECOGREEN",produto:"Arkowood EP",occ:"Desbotamento",status:"Aguardando Cliente",dias:102,valor:0,custo:0,canal:"Formulário SAC"},
+  {id:24,pedido:"23548",abertura:"24/03/2026",cliente:"OLLA TELECON",estado:"RO",vendedor:"SOLUTIO",produto:"Arkowood ASA",occ:"Desbotamento",status:"Resolvido",dias:101,valor:13626,custo:9500,canal:"Formulário SAC"},
+  {id:25,pedido:"5748",abertura:"24/03/2026",cliente:"ADRIANA VIEIRA LUMERTZ",estado:"RS",vendedor:"Screeny Decor",produto:"Arkowood EP",occ:"Rachadura",status:"Resolvido",dias:101,valor:23946,custo:19105,canal:"Formulário SAC"},
+  {id:26,pedido:"23548",abertura:"24/03/2026",cliente:"OLLA TELECON (duplicata)",estado:"RO",vendedor:"SOLUTIO",produto:"Arkowood ASA",occ:"Desbotamento",status:"Resolvido",dias:101,valor:13626,custo:10640,canal:"Formulário SAC"},
+  {id:27,pedido:"22654",abertura:"07/04/2026",cliente:"DANIELA LIMA BARBALHO",estado:"PA",vendedor:"EGYEDIO",produto:"Arkowood E",occ:"Quebrado",status:"Resolvido",dias:87,valor:20304,custo:3809,canal:"Formulário SAC"},
+  {id:28,pedido:"10557",abertura:"07/04/2026",cliente:"ANIBAL FERREIRA MARCELINO JUNIOR",estado:"PR",vendedor:"KELY",produto:"Arkowood E",occ:"Desbotamento",status:"Resolvido",dias:87,valor:22800,custo:1700,canal:"Formulário SAC"},
+  {id:29,pedido:"18561",abertura:"09/04/2026",cliente:"RESIDENCIAL 6 SPE LTDA",estado:"SP",vendedor:"TATIANA ROCHA",produto:"Arkodeck H",occ:"Empenamento",status:"Resolvido",dias:85,valor:56650,custo:0,canal:"Formulário SAC"},
+  {id:30,pedido:"10060",abertura:"09/04/2026",cliente:"CASSIO LAMEGO BULOS",estado:"BA",vendedor:"BRUNA CORREA",produto:"Arkowood E",occ:"Empenamento",status:"Aguardando Cliente",dias:85,valor:99987,custo:0,canal:"Formulário SAC"},
+  {id:31,pedido:"4684",abertura:"10/04/2026",cliente:"MARCELO KALICHSZTEIN",estado:"RJ",vendedor:"RAPHIS",produto:"Arkowood EP",occ:"Desbotamento",status:"Aguardando Cliente",dias:84,valor:44130,custo:26130,canal:"Formulário SAC"},
+  {id:32,pedido:"7820",abertura:"10/04/2026",cliente:"JONAS ROSSI DIAS",estado:"PR",vendedor:"KELY",produto:"Equitone",occ:"Empenamento",status:"Em Andamento",dias:84,valor:155000,custo:8193,canal:"Formulário SAC"},
+  {id:33,pedido:"12226",abertura:"26/01/2026",cliente:"RODRIGO CAPITANIO",estado:"RS",vendedor:"Screeny Decor",produto:"Arkowood EP",occ:"Garantia Outros",status:"Resolvido",dias:158,valor:9186,custo:2050,canal:"Kommo/CRM"},
+  {id:34,pedido:"17583",abertura:"26/01/2026",cliente:"SERGIO LUIZ SALVADOR",estado:"SC",vendedor:"TADEU",produto:"Arkowood K",occ:"Rachadura",status:"Em Andamento",dias:158,valor:11623,custo:11623,canal:"Kommo/CRM"},
+  {id:35,pedido:"17299",abertura:"22/01/2026",cliente:"ARMANDO COURI FILHO",estado:"MG",vendedor:"BO BRASIL",produto:"Arkowood E",occ:"Prod. Errado",status:"Aguardando Cliente",dias:162,valor:79267,custo:0,canal:"Kommo/CRM"},
+  {id:36,pedido:"12549",abertura:"15/01/2026",cliente:"CONDOMINIO MORADA DE L.",estado:"MG",vendedor:"BO BRASIL",produto:"Arkowood K",occ:"Rachadura",status:"Aguardando Cliente",dias:169,valor:306845,custo:0,canal:"Kommo/CRM"},
+  {id:37,pedido:"18593",abertura:"13/01/2026",cliente:"MARIO CESAR DE LIMA ATEM JUNIOR",estado:"AM",vendedor:"SOLUTIO",produto:"Arkowood K",occ:"Empenamento",status:"Resolvido",dias:171,valor:89885,custo:1220,canal:"Kommo/CRM"},
+  {id:38,pedido:"5334",abertura:"13/04/2026",cliente:"MAINA HARBOE",estado:"MG",vendedor:"BRUNA CORREA",produto:"Arkowood EP",occ:"Empenamento",status:"Aguardando Cliente",dias:81,valor:158001,custo:0,canal:"Formulário SAC"},
+  {id:39,pedido:"17397",abertura:"13/04/2026",cliente:"JOSE MARQUES DA SILVA NETO",estado:"PE",vendedor:"ECOGREEN",produto:"",occ:"Outros",status:"Resolvido",dias:81,valor:36600,custo:29900,canal:"Formulário SAC"},
+  {id:40,pedido:"18016",abertura:"14/04/2026",cliente:"BYD DO BRASIL",estado:"SP",vendedor:"SAMANTHA DUTRA",produto:"Arkodeck H",occ:"Desbotamento",status:"Resolvido",dias:80,valor:95000,custo:0,canal:"Formulário SAC"},
+  {id:41,pedido:"6610",abertura:"20/04/2026",cliente:"IDEA QUATTRO EMPREENDIMENTOS",estado:"SC",vendedor:"INNOVATTIO - SC",produto:"Arkodeck E",occ:"Desbotamento",status:"Resolvido",dias:74,valor:16000,custo:1697,canal:"Formulário SAC"},
+  {id:42,pedido:"20842",abertura:"20/04/2026",cliente:"T5 CONSTRUTORA",estado:"SP",vendedor:"SAMANTHA DUTRA",produto:"Arkowood K",occ:"Rachadura",status:"Aguardando Cliente",dias:74,valor:60445,custo:0,canal:"Formulário SAC"},
+  {id:43,pedido:"3756",abertura:"20/04/2026",cliente:"RECLAME AQUI - MARCONI BENETTI",estado:"MG",vendedor:"MARCO AURELIO",produto:"Arkowood EP",occ:"Quebrado",status:"Resolvido",dias:74,valor:115000,custo:0,canal:"Formulário SAC"},
+  {id:44,pedido:"",abertura:"23/04/2026",cliente:"STERMAAN",estado:"GO",vendedor:"STERMAAN",produto:"Arkowood K",occ:"Rachadura",status:"Aguardando Cliente",dias:71,valor:0,custo:0,canal:"Formulário SAC"},
+  {id:45,pedido:"6001",abertura:"23/04/2026",cliente:"BRENO PENHA BORGES",estado:"GO",vendedor:"STERMAAN",produto:"Arkodeck E",occ:"Quebrado",status:"Aguardando Cliente",dias:71,valor:12240,custo:0,canal:"Formulário SAC"},
+  {id:46,pedido:"21538",abertura:"23/04/2026",cliente:"GUSTAVO CINTRA DE SOUZA",estado:"SP",vendedor:"SAMANTHA DUTRA",produto:"Arkowood ASA",occ:"Prod. Errado",status:"Resolvido",dias:71,valor:22910,custo:0,canal:"Kommo/CRM"},
+  {id:47,pedido:"6297",abertura:"04/05/2026",cliente:"FERNANDO GONZAGA PINTO",estado:"PR",vendedor:"KELY",produto:"Arkodeck E",occ:"Desbotamento",status:"Aguardando Cliente",dias:60,valor:131192,custo:0,canal:"Formulário SAC"},
+  {id:48,pedido:"11074",abertura:"04/05/2026",cliente:"PCROZARA E MJHERCULES LTDA",estado:"TO",vendedor:"DAVI",produto:"Arkowood EP",occ:"Quebrado",status:"Aguardando Cliente",dias:60,valor:7299,custo:0,canal:"Formulário SAC"},
+  {id:49,pedido:"",abertura:"07/05/2026",cliente:"Felipe Santos",estado:"SP",vendedor:"",produto:"Arkowood A",occ:"Desbotamento",status:"Aguardando Cliente",dias:57,valor:0,custo:0,canal:"Formulário SAC"},
+  {id:50,pedido:"22750",abertura:"07/05/2026",cliente:"JULIANA CORDEIRO DE FARIA",estado:"MG",vendedor:"ATRIO",produto:"Arkowood EP",occ:"Quebrado",status:"Aguardando Cliente",dias:57,valor:7742,custo:0,canal:"Formulário SAC"},
+  {id:51,pedido:"",abertura:"08/05/2026",cliente:"PRISCILLA LIMENA CASO TUMIARU",estado:"SP",vendedor:"",produto:"",occ:"Outros",status:"Em Andamento",dias:56,valor:0,custo:0,canal:"Formulário SAC"},
+  {id:52,pedido:"2425",abertura:"11/05/2025",cliente:"CAIO AUGUSTO SCOCCO",estado:"SC",vendedor:"INNOVATTIO",produto:"Arkodeck E",occ:"Rachadura",status:"Aguardando Cliente",dias:417,valor:68182,custo:0,canal:"Formulário SAC"},
+  {id:53,pedido:"20907",abertura:"11/05/2025",cliente:"GUSTAVO ROZENBAUM BCHCHE",estado:"MG",vendedor:"BO BRASIL",produto:"Arkowood X",occ:"Empenamento",status:"Resolvido",dias:417,valor:55194,custo:6182,canal:"Formulário SAC"},
+  {id:54,pedido:"7914",abertura:"19/05/2026",cliente:"Jeane Portela Track Field",estado:"PB",vendedor:"",produto:"Arkowood KP",occ:"Desbotamento",status:"Em Andamento",dias:44,valor:0,custo:0,canal:"Formulário SAC"},
+  {id:55,pedido:"11281",abertura:"20/05/2026",cliente:"Alessandra Oliveira El Khoury",estado:"SP",vendedor:"BRUNA CORREA",produto:"Arkowood KP",occ:"Desbotamento",status:"Em Andamento",dias:43,valor:27999,custo:0,canal:"Formulário SAC"},
+  {id:56,pedido:"3794",abertura:"28/05/2026",cliente:"Tamires Gasparetto",estado:"RS",vendedor:"Screeny Decor",produto:"Arkowood EP",occ:"Desbotamento",status:"Em Andamento",dias:35,valor:29634,custo:0,canal:"Formulário SAC"},
+  {id:57,pedido:"22674",abertura:"01/06/2026",cliente:"Marllon Silva Xavier",estado:"CE",vendedor:"Casa 7",produto:"Arkowood KP",occ:"Manchado",status:"Em Andamento",dias:31,valor:6551,custo:0,canal:"Formulário SAC"},
+  {id:58,pedido:"19884",abertura:"01/06/2026",cliente:"Gabriela Pedrazzoli Murilo",estado:"SP",vendedor:"MARCO AURELIO",produto:"Arkodeck E",occ:"Trincado",status:"Em Andamento",dias:31,valor:27784,custo:0,canal:"Formulário SAC"},
+  {id:59,pedido:"16868",abertura:"03/06/2026",cliente:"Paulo Eduardo Ferro Jhully",estado:"SP",vendedor:"DAVI ALVES",produto:"Arkowood K",occ:"Desbotamento",status:"Resolvido",dias:29,valor:100000,custo:0,canal:"Formulário SAC"},
+  {id:60,pedido:"22708",abertura:"05/06/2026",cliente:"CONDOMINIO ALPHAVILE PALMAS 2",estado:"TO",vendedor:"MIRIAM",produto:"Arkowood FPL",occ:"Empenamento",status:"Resolvido",dias:27,valor:0,custo:4800,canal:"Formulário SAC"},
+  {id:61,pedido:"10161",abertura:"05/06/2026",cliente:"Mariana Goes Cunha",estado:"PA",vendedor:"EGYEDIO",produto:"Arkowood EP",occ:"Desbotamento",status:"Em Andamento",dias:27,valor:441509,custo:0,canal:"Formulário SAC"},
+  {id:62,pedido:"9959",abertura:"08/06/2026",cliente:"CONDOMINIO JARDINS DO CAPIBARIBE",estado:"PE",vendedor:"ECOGREEN",produto:"Arkodeck E",occ:"Desbotamento",status:"Em Andamento",dias:24,valor:84000,custo:0,canal:"Formulário SAC"},
+  {id:63,pedido:"5766",abertura:"08/06/2026",cliente:"ASSOC EMPREEND LIFE SPA GYM",estado:"PA",vendedor:"SALLOTO",produto:"Arkodeck E",occ:"Empenamento",status:"Em Andamento",dias:24,valor:37129,custo:0,canal:"Formulário SAC"},
+  {id:64,pedido:"18341",abertura:"09/06/2026",cliente:"EDUARDO MENDES DE MENDONCA",estado:"MG",vendedor:"",produto:"Arkowood KP",occ:"Desbotamento",status:"Em Andamento",dias:23,valor:107826,custo:0,canal:"Formulário SAC"},
+  {id:65,pedido:"3691",abertura:"10/06/2026",cliente:"GABRIELA MUNARINI RAZUK",estado:"MS",vendedor:"",produto:"Arkowood EP",occ:"Desbotamento",status:"Em Andamento",dias:22,valor:180000,custo:0,canal:"Formulário SAC"},
+  {id:66,pedido:"14181",abertura:"10/06/2026",cliente:"Manutencao Cron Engenharia",estado:"SP",vendedor:"",produto:"Arkodeck E",occ:"Empenamento",status:"Em Andamento",dias:22,valor:34440,custo:0,canal:"Formulário SAC"},
+  {id:67,pedido:"16227",abertura:"12/06/2026",cliente:"ATHIE WOHLNRATH",estado:"SP",vendedor:"",produto:"Arkodeck E",occ:"Outros",status:"Em Andamento",dias:20,valor:43691,custo:0,canal:"Formulário SAC"},
+  {id:68,pedido:"14090",abertura:"15/06/2026",cliente:"Hugo Aurelio Martins de Souza",estado:"PB",vendedor:"",produto:"Arkowood KP",occ:"Empenamento",status:"Em Andamento",dias:17,valor:62000,custo:0,canal:"Formulário SAC"},
+  {id:69,pedido:"11077",abertura:"16/06/2026",cliente:"JOSE LUIZ BENTO",estado:"MS",vendedor:"",produto:"Arkowood EP",occ:"Desbotamento",status:"Em Andamento",dias:16,valor:36552,custo:0,canal:"Formulário SAC"},
+  {id:70,pedido:"11049",abertura:"18/06/2026",cliente:"CONDOMINIO LOFT BMRX",estado:"PE",vendedor:"CONTEC",produto:"Arkowood KP",occ:"Desbotamento",status:"Em Andamento",dias:14,valor:190000,custo:0,canal:"Formulário SAC"},
+  {id:71,pedido:"5806",abertura:"03/02/2026",cliente:"Renato Cesar",estado:"DF",vendedor:"STERMAAN",produto:"Arkowood EP",occ:"Desbotamento",status:"Aguardando Cliente",dias:149,valor:34837,custo:19418,canal:"Formulário SAC"},
+  {id:72,pedido:"10070",abertura:"16/05/2025",cliente:"FML Incorporadora",estado:"SC",vendedor:"ABITARE",produto:"Arkowood EPL",occ:"Empenamento",status:"Aguardando Cliente",dias:412,valor:391277,custo:83345,canal:"Formulário SAC"},
+  {id:73,pedido:"9064",abertura:"26/01/2026",cliente:"MELNICKY EVEN APUS",estado:"RS",vendedor:"SCREENYDECOR",produto:"Arkowood EP",occ:"Quebrado",status:"Aguardando Cliente",dias:157,valor:73200,custo:21100,canal:"Formulário SAC"},
+  {id:74,pedido:"1690",abertura:"06/11/2025",cliente:"ALA EMPREENDIMENTOS",estado:"SP",vendedor:"GUILHERME MENDES",produto:"Arkodeck E",occ:"Rachadura",status:"Aguardando Cliente",dias:238,valor:109500,custo:56083,canal:"Formulário SAC"},
+  {id:75,pedido:"10450",abertura:"29/06/2025",cliente:"NOVA GALLERIA",estado:"SP",vendedor:"BRUNA CORREA",produto:"Arkowood K",occ:"Rachadura",status:"Aguardando Cliente",dias:368,valor:37363,custo:37908,canal:"Formulário SAC"},
+  {id:76,pedido:"4519",abertura:"13/05/2025",cliente:"MODULADOS BOA VISTA",estado:"SP",vendedor:"MARCO AURELIO",produto:"Arkowood K",occ:"Rachadura",status:"Aguardando Cliente",dias:415,valor:35000,custo:28920,canal:"Formulário SAC"},
+  {id:77,pedido:"5007",abertura:"18/09/2025",cliente:"EMANOEL CRUZ",estado:"RS",vendedor:"SCREENYDECOR",produto:"Arkowood EP",occ:"Desbotamento",status:"Aguardando Cliente",dias:287,valor:46440,custo:0,canal:"Formulário SAC"},
+  {id:78,pedido:"12504",abertura:"05/02/2025",cliente:"FERNANDO MENDA TORNAIM 2",estado:"RS",vendedor:"SCREENYDECOR",produto:"Arkowood K",occ:"Rachadura",status:"Aguardando Cliente",dias:512,valor:75571,custo:0,canal:"Formulário SAC"}
+];
+
+var NPS = [
+  {timestamp:"25/06/2026 12:09",caso:"Cx",cliente:"Cond Exclusive Itaim",occ:"Manchado",nota:10,categoria:"Promotor",sat:5,satLabel:"Muito satisfeito",comentario:"Vcs ja fazem tudo isto muito bem. Apos 2 anos apresentou manchas e vcs vieram trazer solucoes, ainda nao aplicamos mas ja me sinto segura de que qq problema estarao por perto! Excelente equipe!! Muito bom! O que vale numa relacao e como se resolve quando os problemas chegam! Isto sim fideliza e conecta! Obrigada"}
+];
+
+// ════ ESTADO ════
+var modo = 'total', offset = 0, scol = 'id', sdir = 'asc';
+var CH_OCC = null, CH_PRD = null;
+var HOJE = new Date(2026,6,3);
+
+var OCC_COR = ['#c084fc','#60a5fa','#f97316','#34d399','#f43f5e','#facc15','#a78bfa','#38bdf8','#fb923c','#4ade80'];
+var PRD_COR = ['#6366f1','#14b8a6','#f59e0b','#ec4899','#10b981','#3b82f6','#8b5cf6','#f97316','#06b6d4','#84cc16','#ef4444','#a855f7','#22c55e'];
+var ST_COR  = {Resolvido:'#22c55e','Em Andamento':'#3b82f6','Aguardando Cliente':'#f59e0b'};
+var ST_BG   = {Resolvido:'#14532d','Em Andamento':'#1e3a5f','Aguardando Cliente':'#78350f'};
+
+// ════ INIT ════
+function iniciar() {
+  buildFiltros();
+  render();
+  // Tentar buscar dados novos se URLs configuradas
+  var u = getCfg();
+  if (u.casos) sincronizarSilencioso(u);
+}
+
+// ════ TABS ════
+function setTab(t) {
+  ['sac','nps'].forEach(function(s) {
+    document.getElementById('sec-'+s).classList.toggle('on', s===t);
+    document.getElementById('tab-'+s).classList.toggle('on', s===t);
+  });
+  if (t==='nps') renderNPS();
+}
+
+// ════ PERÍODO ════
+function getBounds() {
+  if (modo==='total') return {s:new Date(2000,0,1),e:new Date(2100,0,1)};
+  if (modo==='personalizado') {
+    var ds = document.getElementById('dde').value;
+    var de = document.getElementById('date').value;
+    return {s:ds?new Date(ds):new Date(2000,0,1), e:de?new Date(de):new Date(2100,0,1)};
+  }
+  if (modo==='semana') {
+    var d=new Date(HOJE); d.setDate(d.getDate()-d.getDay()+1-offset*7);
+    var e=new Date(d); e.setDate(e.getDate()+6);
+    return {s:d,e:e};
+  }
+  if (modo==='mes') {
+    var d=new Date(HOJE.getFullYear(),HOJE.getMonth()-offset,1);
+    return {s:d,e:new Date(d.getFullYear(),d.getMonth()+1,0)};
+  }
+  if (modo==='trimestre') {
+    var q=Math.floor(HOJE.getMonth()/3)-offset;
+    var yr=HOJE.getFullYear()+Math.floor(q/4);
+    q=((q%4)+4)%4;
+    return {s:new Date(yr,q*3,1),e:new Date(yr,q*3+3,0)};
+  }
+  return {s:new Date(2000,0,1),e:new Date(2100,0,1)};
+}
+function getLabel() {
+  var op={day:'2-digit',month:'short'};
+  if (modo==='total') return 'Todos os períodos';
+  if (modo==='personalizado') {
+    var ds=document.getElementById('dde').value, de=document.getElementById('date').value;
+    var fmt=function(s){return s?new Date(s).toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'}):'...'};
+    return fmt(ds)+' — '+fmt(de);
+  }
+  if (modo==='semana') {
+    var d=new Date(HOJE); d.setDate(d.getDate()-d.getDay()+1-offset*7);
+    var e=new Date(d); e.setDate(e.getDate()+6);
+    return d.toLocaleDateString('pt-BR',op)+' — '+e.toLocaleDateString('pt-BR',op);
+  }
+  if (modo==='mes') {
+    return new Date(HOJE.getFullYear(),HOJE.getMonth()-offset,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  }
+  if (modo==='trimestre') {
+    var q=Math.floor(HOJE.getMonth()/3)-offset, yr=HOJE.getFullYear()+Math.floor(q/4);
+    q=((q%4)+4)%4;
+    return 'Q'+(q+1)+' '+yr;
+  }
+  return '';
+}
+function parseDate(s) {
+  if (!s) return null;
+  var p=s.split('/'); if(p.length!==3) return null;
+  return new Date(+p[2],+p[1]-1,+p[0]);
+}
+
+// ════ FILTROS ════
+function buildFiltros() {
+  var prods=[],occs=[];
+  CASOS.forEach(function(c){
+    if(c.produto && prods.indexOf(c.produto)<0) prods.push(c.produto);
+    if(c.occ && occs.indexOf(c.occ)<0) occs.push(c.occ);
+  });
+  prods.sort(); occs.sort();
+  var sp=document.getElementById('fpd'), so=document.getElementById('foc');
+  sp.innerHTML='<option value="">Todos os produtos</option>'+prods.map(function(p){return '<option>'+p+'</option>'}).join('');
+  so.innerHTML='<option value="">Todas as ocorrências</option>'+occs.map(function(o){return '<option>'+o+'</option>'}).join('');
+}
+function getFiltrado() {
+  var b=getBounds();
+  var fst=document.getElementById('fst').value;
+  var fpd=document.getElementById('fpd').value;
+  var foc=document.getElementById('foc').value;
+  var bsc=(document.getElementById('busca').value||'').toLowerCase();
+  return CASOS.filter(function(c){
+    if (modo!=='total') {
+      var d=parseDate(c.abertura);
+      if (d && (d<b.s||d>b.e)) return false;
+    }
+    if (fst && c.status!==fst) return false;
+    if (fpd && c.produto!==fpd) return false;
+    if (foc && c.occ!==foc)    return false;
+    if (bsc && (c.id+' '+c.cliente+' '+c.produto+' '+c.estado+' '+c.status).toLowerCase().indexOf(bsc)<0) return false;
+    return true;
+  });
+}
+function getAbertos() {
+  var fpd=document.getElementById('fpd').value;
+  var foc=document.getElementById('foc').value;
+  return CASOS.filter(function(c){
+    if (c.status==='Resolvido') return false;
+    if (fpd && c.produto!==fpd) return false;
+    if (foc && c.occ!==foc)    return false;
+    return true;
+  });
+}
+
+// ════ RENDER ════
+function render() {
+  // atualiza header
+  var res=CASOS.filter(function(c){return c.status==='Resolvido'}).length;
+  document.getElementById('hres').textContent=res+' resolvidos';
+  document.getElementById('hab').textContent=(CASOS.length-res)+' em aberto';
+
+  // nav / date wrappers
+  var showNav = modo!=='total'&&modo!=='personalizado';
+  var showDate= modo==='personalizado';
+  var nw=document.getElementById('nav-wrap'), dw=document.getElementById('date-wrap');
+  nw.style.display=showNav?'flex':'none';
+  dw.style.display=showDate?'flex':'none';
+  if (showNav) document.getElementById('plabel').textContent=getLabel();
+
+  var fil=getFiltrado(), ab=getAbertos();
+
+  // KPIs
+  var res2=fil.filter(function(c){return c.status==='Resolvido'}).length;
+  var taxa=fil.length?(res2/fil.length*100):0;
+  var vrisco=ab.reduce(function(s,c){return s+c.valor},0);
+  var custo=fil.reduce(function(s,c){return s+c.custo},0);
+  function fm(v){return v>0?'R$ '+v.toLocaleString('pt-BR',{maximumFractionDigits:0}):'—'}
+  document.getElementById('kpis').innerHTML=
+    '<div class="card" style="border-top:3px solid var(--ac)"><div class="klbl">Casos no período</div><div class="kval">'+fil.length+'</div><div class="ksub">de '+CASOS.length+' total</div></div>'+
+    '<div class="card" style="border-top:3px solid var(--gr)"><div class="klbl">Taxa de resolução</div><div class="kval" style="color:var(--gr)">'+taxa.toFixed(0)+'%</div><div class="ksub">'+res2+' de '+fil.length+' resolvidos</div></div>'+
+    '<div class="card" style="border-top:3px solid var(--or)"><div class="klbl">Valor em risco</div><div class="kval" style="color:var(--or);font-size:18px">'+fm(vrisco)+'</div><div class="ksub">'+ab.length+' casos em aberto</div></div>'+
+    '<div class="card" style="border-top:3px solid var(--pu)"><div class="klbl">Custo efetivo</div><div class="kval" style="color:var(--pu);font-size:18px">'+fm(custo)+'</div><div class="ksub">bonif. + MO + frete</div></div>';
+
+  // Donuts
+  renderDonut('cocc','locc',countBy(fil,'occ'),OCC_COR,'CH_OCC');
+  renderDonut('cprd','lprd',countBy(fil,'produto'),PRD_COR,'CH_PRD');
+
+  // Canal + Status
+  var canais=countBy(fil,'canal');
+  var tot=fil.length||1;
+  var hcan='';
+  Object.entries(canais).forEach(function(e,i){
+    hcan+='<div class="crow"><div class="cdot" style="background:'+OCC_COR[i%OCC_COR.length]+'"></div>'+
+      '<span class="clabel">'+e[0]+'</span>'+
+      '<span class="cval">'+e[1]+'</span>'+
+      '<div class="ctrack"><div class="cfill" style="width:'+(e[1]/tot*100)+'%;background:'+OCC_COR[i%OCC_COR.length]+'"></div></div></div>';
+  });
+  document.getElementById('canais').innerHTML=hcan;
+  var hst='';
+  Object.entries(ST_COR).forEach(function(e){
+    var cnt=fil.filter(function(c){return c.status===e[0]}).length;
+    hst+='<div class="crow"><div class="cdot" style="background:'+e[1]+';border-radius:50%"></div>'+
+      '<span class="clabel">'+e[0]+'</span>'+
+      '<span style="font-weight:700;color:'+e[1]+';font-size:13px">'+cnt+'</span></div>';
+  });
+  document.getElementById('statuses').innerHTML=hst;
+
+  // Aging
+  var a0=ab.filter(function(c){return c.dias<=30}).length;
+  var a31=ab.filter(function(c){return c.dias>30&&c.dias<=60}).length;
+  var a61=ab.filter(function(c){return c.dias>60&&c.dias<=90}).length;
+  var a90=ab.filter(function(c){return c.dias>90}).length;
+  var med=ab.length?Math.round(ab.reduce(function(s,c){return s+c.dias},0)/ab.length):0;
+  var mx=Math.max(a0,a31,a61,a90,1);
+  document.getElementById('amed').textContent=med;
+  var hag=[['0 – 30 dias',a0,'#22c55e'],['31 – 60 dias',a31,'#f59e0b'],['61 – 90 dias',a61,'#f97316'],['+90 dias',a90,'#ef4444']].map(function(x){
+    return '<div class="arow"><div class="ahdr"><span class="albl">'+x[0]+'</span><span class="acnt" style="color:'+x[2]+'">'+x[1]+' casos</span></div>'+
+      '<div class="atrack"><div class="afill" style="width:'+(x[1]/mx*100)+'%;background:'+x[2]+'"></div></div></div>';
+  }).join('');
+  document.getElementById('aging').innerHTML=hag;
+  var crit=ab.filter(function(c){return c.dias>90}).sort(function(a,b){return b.dias-a.dias});
+  document.getElementById('alerta').innerHTML=a90>0?'<div class="alerta"><div class="alerta-t">⚠ '+a90+' casos vencidos (+90 dias)</div>'+
+    crit.slice(0,5).map(function(c){return '<div class="alerta-i">#'+c.id+' '+c.cliente.slice(0,28)+' — <b>'+c.dias+'d</b></div>'}).join('')+
+    (crit.length>5?'<div class="alerta-i">...e mais '+(crit.length-5)+'</div>':'')+'</div>':'';
+
+  // Trend
+  var fpd=document.getElementById('fpd').value;
+  var foc=document.getElementById('foc').value;
+  var meses=[]; for(var i=5;i>=0;i--){
+    var d=new Date(2026,6-i,1);
+    var lb=d.toLocaleDateString('pt-BR',{month:'short',year:'2-digit'});
+    var ms=new Date(d.getFullYear(),d.getMonth(),1), me=new Date(d.getFullYear(),d.getMonth()+1,0);
+    var sl=CASOS.filter(function(c){
+      var dt=parseDate(c.abertura);
+      if(!dt||dt<ms||dt>me) return false;
+      if(fpd&&c.produto!==fpd) return false;
+      if(foc&&c.occ!==foc) return false;
+      return true;
+    });
+    meses.push({lb:lb,ab:sl.length,res:sl.filter(function(c){return c.status==='Resolvido'}).length});
+  }
+  var mxt=Math.max.apply(null,meses.map(function(m){return m.ab}).concat([1]));
+  document.getElementById('trend').innerHTML=meses.map(function(m){
+    return '<div class="tmes"><div class="tbars">'+
+      '<div class="tbar" style="height:'+Math.round(m.ab/mxt*110)+'px;background:var(--ac)"></div>'+
+      '<div class="tbar" style="height:'+Math.round(m.res/mxt*110)+'px;background:var(--gr)"></div>'+
+      '</div><div class="tmlbl">'+m.lb+'</div></div>';
+  }).join('');
+
+  // Tabela
+  var rows=fil.slice();
+  if (document.getElementById('busca').value) {
+    var bsc=document.getElementById('busca').value.toLowerCase();
+    rows=rows.filter(function(c){
+      return (c.id+' '+c.cliente+' '+c.produto+' '+c.estado+' '+c.status).toLowerCase().indexOf(bsc)>=0;
+    });
+  }
+  rows.sort(function(a,b){
+    var va=a[scol],vb=b[scol];
+    if(typeof va==='string'){va=va.toLowerCase();vb=vb.toLowerCase();}
+    if(va<vb) return sdir==='asc'?-1:1;
+    if(va>vb) return sdir==='asc'?1:-1;
+    return 0;
+  });
+  document.getElementById('ttitle').textContent='Casos ('+rows.length+')';
+  document.getElementById('tbody').innerHTML=rows.map(function(c,i){
+    var diaClr=c.dias>90?'var(--rd)':c.dias>60?'var(--or)':'var(--t2)';
+    return '<tr>'+
+      '<td style="color:var(--ac);font-weight:700">#'+c.id+'</td>'+
+      '<td>'+c.abertura+'</td>'+
+      '<td style="max-width:165px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+c.cliente+'</td>'+
+      '<td><span style="background:var(--bg3);padding:2px 6px;border-radius:4px;font-size:11px">'+( c.estado||'—')+'</span></td>'+
+      '<td style="color:#a5b4fc;font-size:11px">'+(c.produto||'—')+'</td>'+
+      '<td style="font-size:11px">'+(c.occ||'—')+'</td>'+
+      '<td><span class="badge" style="background:'+(ST_BG[c.status]||'#1e293b')+';color:'+(ST_COR[c.status]||'#94a3b8')+'">'+c.status+'</span></td>'+
+      '<td style="text-align:right;font-weight:700;color:'+diaClr+'">'+c.dias+'d</td>'+
+      '<td style="text-align:right;font-size:11px">'+(c.valor>0?fm(c.valor):'—')+'</td>'+
+      '<td style="text-align:right;font-size:11px;color:'+(c.custo>0?'var(--or)':'var(--t3)')+'">'+( c.custo>0?fm(c.custo):'—')+'</td>'+
+      '</tr>';
+  }).join('');
+
+  // Th sorted
+  ['id','abertura','cliente','estado','produto','occ','status','dias','valor','custo'].forEach(function(col){
+    var el=document.getElementById('th-'+col); if(el) el.className=col===scol?'sorted':'';
+  });
+}
+
+// ════ NPS ════
+function renderNPS() {
+  var prom=NPS.filter(function(r){return r.nota>=9}).length;
+  var neut=NPS.filter(function(r){return r.nota>=7&&r.nota<=8}).length;
+  var detr=NPS.filter(function(r){return r.nota<=6}).length;
+  var tot=NPS.length;
+  var nps=tot>0?Math.round((prom-detr)/tot*100):null;
+  var avgS=tot>0?(NPS.reduce(function(s,r){return s+r.sat},0)/tot).toFixed(1):null;
+  var nc=nps===null?'#64748b':nps>=75?'#22c55e':nps>=50?'#f59e0b':'#ef4444';
+  var nz=nps===null?'':nps>=75?'Zona de Excelência':nps>=50?'Zona de Qualidade':nps>=0?'Zona de Aperfeiçoamento':'Zona Crítica';
+  if (tot===0) {
+    document.getElementById('nps-html').innerHTML='<div style="text-align:center;padding:60px 20px"><div style="font-size:48px;margin-bottom:16px">⭐</div><div style="font-size:18px;font-weight:700;margin-bottom:8px">Nenhuma resposta NPS ainda</div><div style="font-size:13px;color:var(--t3)">As respostas do formulário arkosbrasil.github.io/nps-sac aparecem aqui automaticamente após sincronização.</div></div>';
+    return;
+  }
+  function fm(v){return v>0?'R$ '+v.toLocaleString('pt-BR',{maximumFractionDigits:0}):'—'}
+  document.getElementById('nps-html').innerHTML=
+    '<div class="g4" style="margin-bottom:14px">'+
+      '<div class="card" style="border-top:3px solid '+nc+';text-align:center"><div class="klbl">NPS Score</div><div class="nps-big" style="color:'+nc+'">'+nps+'</div><div style="font-size:11px;color:'+nc+';margin-top:4px;font-weight:600">'+nz+'</div></div>'+
+      '<div class="card" style="border-top:3px solid var(--gr);text-align:center"><div class="klbl">Promotores (9-10)</div><div class="kval" style="color:var(--gr)">'+prom+'</div><div class="ksub">'+(tot?Math.round(prom/tot*100):0)+'% do total</div></div>'+
+      '<div class="card" style="border-top:3px solid var(--yw);text-align:center"><div class="klbl">Neutros (7-8)</div><div class="kval" style="color:var(--yw)">'+neut+'</div><div class="ksub">'+(tot?Math.round(neut/tot*100):0)+'% do total</div></div>'+
+      '<div class="card" style="border-top:3px solid var(--rd);text-align:center"><div class="klbl">Detratores (0-6)</div><div class="kval" style="color:var(--rd)">'+detr+'</div><div class="ksub">'+(tot?Math.round(detr/tot*100):0)+'% do total</div></div>'+
+    '</div>'+
+    '<div class="g2" style="margin-bottom:14px">'+
+      '<div class="card"><div class="ctitle">Satisfação média — atendimento</div>'+
+        '<div style="text-align:center;padding:10px 0">'+
+          '<div style="font-size:44px;font-weight:800;color:var(--ac);line-height:1">'+avgS+'</div>'+
+          '<div style="font-size:12px;color:var(--t2);margin-top:4px">de 5.0</div>'+
+          '<div class="stars">'+[1,2,3,4,5].map(function(i){return '<div class="star" style="background:'+(parseFloat(avgS)>=i?'var(--ac)':'var(--bg3)')+'">'+i+'</div>'}).join('')+'</div>'+
+          '<div style="font-size:12px;color:#a5b4fc;margin-top:6px">'+(NPS[0]?NPS[0].satLabel:'')+'</div>'+
+        '</div></div>'+
+      '<div class="card"><div class="ctitle">Escala NPS</div>'+
+        '<div class="escala" style="margin-top:10px">'+
+          '<div class="ez" style="background:var(--rd)">Crítica -100→0</div>'+
+          '<div class="ez" style="background:var(--or)">Aperfeiç. 1→49</div>'+
+          '<div class="ez" style="background:var(--yw)">Qualidade 50→74</div>'+
+          '<div class="ez" style="background:var(--gr)">Excelência 75→100</div>'+
+        '</div>'+
+        (nps!==null?'<div style="background:var(--bg);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-top:10px">'+
+          '<div style="width:36px;height:36px;border-radius:50%;background:'+nc+';display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff;flex-shrink:0">'+nps+'</div>'+
+          '<div><div style="font-size:13px;font-weight:700;color:'+nc+'">'+nz+'</div><div style="font-size:11px;color:var(--t3);margin-top:1px">Baseado em '+tot+' resposta'+(tot!==1?'s':'')+'</div></div></div>':'')+
+      '</div>'+
+    '</div>'+
+    '<div class="card">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'+
+        '<div class="ctitle">Respostas ('+tot+')</div>'+
+        '<div style="font-size:11px;color:var(--t3)">Fonte: aba NPS · arkosbrasil.github.io/nps-sac</div>'+
+      '</div>'+
+      NPS.map(function(r){
+        var nc2=r.nota>=9?'var(--gr)':r.nota>=7?'var(--yw)':'var(--rd)';
+        var nbg2=r.categoria==='Promotor'?'#14532d':r.categoria==='Neutro'?'#78350f':'#450a0a';
+        return '<div class="ncard">'+
+          '<div class="nchdr">'+
+            '<div><div class="nc">'+r.cliente+'</div><div class="nm">'+r.timestamp+(r.occ?' · <span style="background:var(--bg3);color:#a5b4fc;border-radius:4px;padding:1px 6px;font-size:11px">'+r.occ+'</span>':'')+'</div></div>'+
+            '<div class="nscs">'+
+              '<div class="nbn"><div class="lbl">NPS</div><div class="num" style="color:'+nc2+'">'+r.nota+'</div></div>'+
+              '<span class="badge" style="background:'+nbg2+';color:'+(r.categoria==='Promotor'?'var(--gr)':r.categoria==='Neutro'?'var(--yw)':'var(--rd)')+'">'+r.categoria+'</span>'+
+              '<div class="nbn"><div class="lbl">Atend.</div><div class="num" style="color:var(--ac)">'+r.sat+'/5</div></div>'+
+            '</div>'+
+          '</div>'+
+          (r.comentario?'<div class="ncmt">"'+r.comentario+'"</div>':'')+
+        '</div>';
+      }).join('')+
+      '<div style="font-size:11px;color:var(--t3);text-align:center;margin-top:8px">Sincronize para ver novas respostas do formulário NPS.</div>'+
+    '</div>';
+}
+
+// ════ DONUTS ════
+function countBy(arr,key){
+  var m={};
+  arr.forEach(function(r){if(r[key])m[r[key]]=(m[r[key]]||0)+1;});
+  return Object.entries(m).sort(function(a,b){return b[1]-a[1]});
+}
+function renderDonut(cid,lid,data,cors,chVar){
+  var canvas=document.getElementById(cid); if(!canvas) return;
+  if(window[chVar]){window[chVar].destroy();}
+  var labels=data.map(function(d){return d[0]});
+  var values=data.map(function(d){return d[1]});
+  var total=values.reduce(function(s,v){return s+v},0);
+  window[chVar]=new Chart(canvas,{
+    type:'doughnut',
+    data:{labels:labels,datasets:[{data:values,backgroundColor:cors.slice(0,labels.length),borderWidth:0}]},
+    options:{cutout:'64%',plugins:{
+      legend:{display:false},
+      tooltip:{callbacks:{label:function(c){return c.label+': '+c.raw+' ('+Math.round(c.raw/total*100)+'%)'}},
+        backgroundColor:'#0f172a',borderColor:'#1e293b',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8'}
+    }}
+  });
+  document.getElementById(lid).innerHTML=labels.map(function(l,i){
+    return '<span style="font-size:11px;color:#cbd5e1;display:flex;align-items:center;gap:3px">'+
+      '<span style="width:9px;height:9px;border-radius:2px;background:'+cors[i%cors.length]+';display:inline-block"></span>'+
+      l+' <span style="color:'+cors[i%cors.length]+';font-weight:700">'+values[i]+'</span></span>';
+  }).join('');
+}
+
+// ════ SORT ════
+function sortBy(col){
+  if(scol===col){sdir=sdir==='asc'?'desc':'asc';}else{scol=col;sdir='asc';}
+  render();
+}
+
+// ════ MODO / OFFSET ════
+function setModo(btn,m){
+  modo=m; offset=0;
+  document.querySelectorAll('.mbtn').forEach(function(b){b.classList.remove('on')});
+  btn.classList.add('on');
+  render();
+}
+function mudaOffset(d){offset+=d; if(offset<0)offset=0; render();}
+function limparDatas(){document.getElementById('dde').value='';document.getElementById('date').value='';render();}
+
+// ════ CONFIG / SYNC ════
+function getCfg(){try{return JSON.parse(localStorage.getItem('arkos_sac_v2'))||{}}catch(e){return{}}}
+function abrirCfg(){
+  var u=getCfg();
+  document.getElementById('ucasos').value=u.casos||'';
+  document.getElementById('unps').value=u.nps||'';
+  document.getElementById('cfg-msg').style.display='none';
+  document.getElementById('overlay-cfg').classList.add('ativa');
+}
+function fecharCfg(){document.getElementById('overlay-cfg').classList.remove('ativa');}
+function salvarCfg(){
+  var u1=document.getElementById('ucasos').value.trim();
+  var u2=document.getElementById('unps').value.trim();
+  localStorage.setItem('arkos_sac_v2',JSON.stringify({casos:u1,nps:u2}));
+  document.getElementById('cfg-msg').style.display='block';
+  setTimeout(function(){fecharCfg();if(u1)sincronizar();},1200);
+}
+function sincronizar(){
+  var u=getCfg(); if(!u.casos){abrirCfg();return;}
+  sincronizarSilencioso(u,true);
+}
+function sincronizarSilencioso(u,aviso){
+  if(aviso) document.getElementById('hab').textContent='Sincronizando...';
+  var ps=[];
+  if(u.casos) ps.push(fetch(u.casos).then(function(r){return r.text()}).then(function(t){
+    var linhas=t.split('\n').map(function(l){return l.split(',')});
+    var novos=linhas.slice(3).filter(function(r){return r[1]&&/^\d+$/.test(r[1].trim())}).map(function(r){
+      function moe(s){if(!s)return 0;return parseFloat(s.replace(/R\$\s*/g,'').replace(/\./g,'').replace(',','.'))||0;}
+      return {
+        id:parseInt(r[1])||0,pedido:(r[0]||'').trim(),abertura:(r[3]||'').trim(),
+        triagem:(r[8]||'').trim(),cliente:(r[9]||'').trim(),estado:(r[10]||'').trim(),
+        vendedor:(r[11]||'').trim(),canal:(r[14]||'').trim(),produto:(r[15]||'').trim(),
+        occ:(r[17]||'').trim(),status:(r[22]||'').trim(),
+        dias:parseInt(r[32])||0,valor:moe(r[36]),custo:moe(r[44])
+      };
+    }).filter(function(r){return r.status&&r.cliente});
+    if(novos.length>0){CASOS=novos;buildFiltros();}
+  }).catch(function(){}));
+  if(u.nps) ps.push(fetch(u.nps).then(function(r){return r.text()}).then(function(t){
+    var linhas=t.split('\n').map(function(l){return l.split(',')});
+    var novos=linhas.slice(1).map(function(r){
+      return {timestamp:(r[0]||'').trim(),caso:(r[1]||'').trim(),cliente:(r[2]||'').trim(),
+        occ:(r[4]||'').trim(),nota:parseFloat(r[5])||0,categoria:(r[6]||'').trim(),
+        sat:parseFloat(r[7])||0,satLabel:(r[8]||'').trim(),comentario:(r[10]||'').trim()};
+    }).filter(function(r){return r.nota>0&&r.cliente});
+    if(novos.length>0) NPS=novos;
+  }).catch(function(){}));
+  Promise.all(ps).then(function(){render();if(aviso){document.getElementById('hab').textContent=(CASOS.length-CASOS.filter(function(c){return c.status==='Resolvido'}).length)+' em aberto';}});
+}
+
+// Fechar modal clicando fora
+document.getElementById('overlay-cfg').addEventListener('click',function(e){if(e.target===this)fecharCfg();});
+</script>
+</body>
+</html>
