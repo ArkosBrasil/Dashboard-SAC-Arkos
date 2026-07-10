@@ -199,7 +199,6 @@ tr:nth-child(even) td{background:var(--bg)}
     </div>
     <div class="hdr-dir">
       <button class="btn-refresh" onclick="sincronizar()">&#8635; Sincronizar</button>
-      <button class="btn-cfg" onclick="abrirCfg()" title="Configurar URLs da planilha">&#9881;</button>
       <img src="data:image/png;base64,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" class="hdr-logo" alt="Arkos">
     </div>
   </div>
@@ -450,13 +449,17 @@ var PRD_COR = ['#6366f1','#14b8a6','#f59e0b','#ec4899','#10b981','#3b82f6','#8b5
 var ST_COR  = {Resolvido:'#22c55e','Em Andamento':'#3b82f6','Aguardando Cliente':'#f59e0b'};
 var ST_BG   = {Resolvido:'#14532d','Em Andamento':'#1e3a5f','Aguardando Cliente':'#78350f'};
 
+// ════ URLs FIXAS — export direto, ignora filtros da planilha ════
+var SHEET_ID  = '1Um7x5VwJviC1cn1G_ZqlSM0Lnqv-Iu7650su2hBsmaA';
+var URL_CASOS = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid=1';
+var URL_NPS   = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?format=csv&gid=4';
+
 // ════ INIT ════
 function iniciar() {
   buildFiltros();
   render();
-  // Tentar buscar dados novos se URLs configuradas
-  var u = getCfg();
-  if (u.casos) sincronizarSilencioso(u);
+  // Sincroniza em background automaticamente ao abrir
+  sincronizarSilencioso({casos:URL_CASOS, nps:URL_NPS}, false);
 }
 
 // ════ TABS ════
@@ -835,8 +838,7 @@ function salvarCfg(){
   setTimeout(function(){fecharCfg();if(u1)sincronizar();},1200);
 }
 function sincronizar(){
-  var u=getCfg(); if(!u.casos){abrirCfg();return;}
-  sincronizarSilencioso(u,true);
+  sincronizarSilencioso({casos:URL_CASOS, nps:URL_NPS}, true);
 }
 function moe(s){
   if(!s) return 0;
@@ -871,8 +873,12 @@ function sincronizarSilencioso(u,aviso){
           custo:moe(r[44])
         };
       }).filter(function(r){return r.status&&r.cliente;});
-      if(novos.length>0){CASOS=novos;buildFiltros();console.log('Casos OK:',novos.length);}
-      else{console.warn('Sync Casos: nenhum dado válido. Verifique a URL e se a planilha está publicada.');}
+      if(novos.length>0){
+        CASOS=novos; buildFiltros();
+        console.log('Casos sincronizados:', novos.length);
+      } else {
+        console.warn('Sync: nenhum dado válido retornado.');
+      }
     }).catch(function(e){console.warn('Erro Casos:',e);}));
   }
 
@@ -901,6 +907,7 @@ function sincronizarSilencioso(u,aviso){
     if(aviso){
       var ab=CASOS.filter(function(c){return c.status!=='Resolvido';}).length;
       document.getElementById('hab').textContent=ab+' em aberto';
+      document.getElementById('hsub').textContent='Sincronizado agora · '+CASOS.length+' casos';
     }
   });
 }
