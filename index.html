@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Arkos | Dashboard SAC</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
 :root{
   --bg:#0a0f1e;--bg2:#0f172a;--bg3:#1e293b;--b2:#334155;
@@ -837,33 +838,71 @@ function sincronizar(){
   var u=getCfg(); if(!u.casos){abrirCfg();return;}
   sincronizarSilencioso(u,true);
 }
+function moe(s){
+  if(!s) return 0;
+  var c=s.toString().replace(/R\$\s*/g,'').replace(/\./g,'').replace(',','.');
+  return parseFloat(c)||0;
+}
+
 function sincronizarSilencioso(u,aviso){
   if(aviso) document.getElementById('hab').textContent='Sincronizando...';
   var ps=[];
-  if(u.casos) ps.push(fetch(u.casos).then(function(r){return r.text()}).then(function(t){
-    var linhas=t.split('\n').map(function(l){return l.split(',')});
-    var novos=linhas.slice(3).filter(function(r){return r[1]&&/^\d+$/.test(r[1].trim())}).map(function(r){
-      function moe(s){if(!s)return 0;return parseFloat(s.replace(/R\$\s*/g,'').replace(/\./g,'').replace(',','.'))||0;}
-      return {
-        id:parseInt(r[1])||0,pedido:(r[0]||'').trim(),abertura:(r[3]||'').trim(),
-        triagem:(r[8]||'').trim(),cliente:(r[9]||'').trim(),estado:(r[10]||'').trim(),
-        vendedor:(r[11]||'').trim(),canal:(r[14]||'').trim(),produto:(r[15]||'').trim(),
-        occ:(r[17]||'').trim(),status:(r[22]||'').trim(),
-        dias:parseInt(r[32])||0,valor:moe(r[36]),custo:moe(r[44])
-      };
-    }).filter(function(r){return r.status&&r.cliente});
-    if(novos.length>0){CASOS=novos;buildFiltros();}
-  }).catch(function(){}));
-  if(u.nps) ps.push(fetch(u.nps).then(function(r){return r.text()}).then(function(t){
-    var linhas=t.split('\n').map(function(l){return l.split(',')});
-    var novos=linhas.slice(1).map(function(r){
-      return {timestamp:(r[0]||'').trim(),caso:(r[1]||'').trim(),cliente:(r[2]||'').trim(),
-        occ:(r[4]||'').trim(),nota:parseFloat(r[5])||0,categoria:(r[6]||'').trim(),
-        sat:parseFloat(r[7])||0,satLabel:(r[8]||'').trim(),comentario:(r[10]||'').trim()};
-    }).filter(function(r){return r.nota>0&&r.cliente});
-    if(novos.length>0) NPS=novos;
-  }).catch(function(){}));
-  Promise.all(ps).then(function(){render();if(aviso){document.getElementById('hab').textContent=(CASOS.length-CASOS.filter(function(c){return c.status==='Resolvido'}).length)+' em aberto';}});
+
+  if(u.casos){
+    ps.push(fetch(u.casos).then(function(r){return r.text();}).then(function(t){
+      var rows=Papa.parse(t,{skipEmptyLines:true}).data;
+      // 3 linhas de cabeçalho Arkos antes dos dados reais
+      var novos=rows.slice(3).filter(function(r){
+        return r[1]&&/^\d+$/.test(r[1].toString().trim());
+      }).map(function(r){
+        return {
+          id:parseInt(r[1])||0,
+          pedido:(r[0]||'').trim(),
+          abertura:(r[3]||'').trim(),
+          cliente:(r[9]||'').trim(),
+          estado:(r[10]||'').trim(),
+          vendedor:(r[11]||'').trim(),
+          canal:(r[14]||'').trim(),
+          produto:(r[15]||'').trim(),
+          occ:(r[17]||'').trim(),
+          status:(r[22]||'').trim(),
+          dias:parseInt(r[32])||0,
+          valor:moe(r[36]),
+          custo:moe(r[44])
+        };
+      }).filter(function(r){return r.status&&r.cliente;});
+      if(novos.length>0){CASOS=novos;buildFiltros();console.log('Casos OK:',novos.length);}
+      else{console.warn('Sync Casos: nenhum dado válido. Verifique a URL e se a planilha está publicada.');}
+    }).catch(function(e){console.warn('Erro Casos:',e);}));
+  }
+
+  if(u.nps){
+    ps.push(fetch(u.nps).then(function(r){return r.text();}).then(function(t){
+      var rows=Papa.parse(t,{skipEmptyLines:true}).data;
+      var novos=rows.slice(1).map(function(r){
+        return {
+          timestamp:(r[0]||'').trim(),
+          caso:(r[1]||'').trim(),
+          cliente:(r[2]||'').trim(),
+          occ:(r[4]||'').trim(),
+          nota:parseFloat(r[5])||0,
+          categoria:(r[6]||'').trim(),
+          sat:parseFloat(r[7])||0,
+          satLabel:(r[8]||'').trim(),
+          comentario:(r[10]||'').trim()
+        };
+      }).filter(function(r){return r.nota>0&&r.cliente;});
+      if(novos.length>0){NPS=novos;console.log('NPS OK:',novos.length);}
+    }).catch(function(e){console.warn('Erro NPS:',e);}));
+  }
+
+  Promise.all(ps).then(function(){
+    render();
+    if(aviso){
+      var ab=CASOS.filter(function(c){return c.status!=='Resolvido';}).length;
+      document.getElementById('hab').textContent=ab+' em aberto';
+    }
+  });
 }
 
 // Fechar modal clicando fora
