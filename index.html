@@ -772,8 +772,20 @@ function sincronizarSilencioso(u,aviso){
   if(u.casos){
     ps.push(fetch(u.casos).then(function(r){return r.text();}).then(function(t){
       var rows=Papa.parse(t,{skipEmptyLines:true}).data;
-      // 3 linhas de cabeçalho Arkos antes dos dados reais
-      var novos=rows.slice(3).filter(function(r){
+
+      // Detecta automaticamente a linha do cabeçalho real
+      // (a que contém "Nº Caso" ou "Nome do Cliente")
+      var headerIdx = 2; // fallback padrão
+      for(var h=0; h<Math.min(rows.length,6); h++){
+        var joined = rows[h].join('|').toLowerCase();
+        if(joined.indexOf('caso') >= 0 && joined.indexOf('cliente') >= 0){
+          headerIdx = h; break;
+        }
+      }
+      console.log('Header na linha', headerIdx, ':', rows[headerIdx] ? rows[headerIdx].slice(0,5) : 'N/A');
+      console.log('Primeira linha de dados:', rows[headerIdx+1] ? rows[headerIdx+1].slice(0,5) : 'N/A');
+
+      var novos=rows.slice(headerIdx+1).filter(function(r){
         var temCaso    = r[1] && /^\d+$/.test(r[1].toString().trim());
         var temCliente = r[9] && r[9].toString().trim().length > 2;
         var temStatus  = r[22] && r[22].toString().trim().length > 0;
@@ -799,7 +811,9 @@ function sincronizarSilencioso(u,aviso){
         CASOS=novos; buildFiltros();
         console.log('Casos sincronizados:', novos.length);
       } else {
-        console.warn('Sync: nenhum dado válido retornado.');
+        // Debug: mostra as primeiras linhas para diagnóstico
+        console.warn('SYNC: 0 casos encontrados. Primeiras 5 linhas do CSV:');
+        rows.slice(0,5).forEach(function(r,i){ console.log('Linha '+i+':', JSON.stringify(r.slice(0,5))); });
       }
     }).catch(function(e){console.warn('Erro Casos:',e);}));
   }
