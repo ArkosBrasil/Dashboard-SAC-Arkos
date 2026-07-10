@@ -354,91 +354,9 @@ function entrar() {
   }
 }
 
-// ════ DADOS BASE ════
-var CASOS = [
-  {id:1,pedido:"18671",abertura:"03/02/2026",cliente:"SÃO PAULO GOLF CLUB",estado:"SP",vendedor:"DAVI ALVES",produto:"Arkowood K",occ:"Empenamento",status:"Resolvido",dias:150,valor:180000,custo:25000,canal:"Formulário SAC"},
-  {id:2,pedido:"4379",abertura:"05/02/2026",cliente:"Danielle de Lima Carvalho",estado:"RJ",vendedor:"RAPHIS",produto:"Arkowood EP",occ:"Rachadura",status:"Em Andamento",dias:148,valor:41813,custo:16680,canal:"Formulário SAC"},
-  {id:3,pedido:"22815",abertura:"09/02/2026",cliente:"DYNAMICS METALURGICA LTDA",estado:"PR",vendedor:"SUNFIX",produto:"Arkowood K",occ:"Prod. Errado",status:"Resolvido",dias:144,valor:10332,custo:0,canal:"Kommo/CRM"},
-  {id:4,pedido:"4587",abertura:"11/02/2026",cliente:"HELIO HENRIQUE SETTE DA SILVA",estado:"SP",vendedor:"TATIANA ROCHA",produto:"Arkowood K",occ:"Desbotamento",status:"Aguardando Cliente",dias:142,valor:86000,custo:7204,canal:"Formulário SAC"},
-  {id:5,pedido:"20045",abertura:"12/02/2026",cliente:"CASA AVILA INVESTIMENTOS IMOB.",estado:"SP",vendedor:"SAMANTHA DUTRA",produto:"Arkowood A",occ:"Garantia Outros",status:"Resolvido",dias:141,valor:80912,custo:0,canal:"Kommo/CRM"},
-  {id:6,pedido:"9577",abertura:"12/02/2026",cliente:"HAROLDO LUÍS PESSOA PICANÇO",estado:"",vendedor:"EGYEDIO",produto:"Arkowood KP",occ:"Empenamento",status:"Em Andamento",dias:141,valor:72259,custo:19000,canal:"Formulário SAC"},
-  {id:7,pedido:"16393",abertura:"18/02/2026",cliente:"Marcelo Salles Oliveira",estado:"SP",vendedor:"TATIANA ROCHA",produto:"Arkodeck E",occ:"Empenamento",status:"Resolvido",dias:135,valor:270000,custo:0,canal:"Formulário SAC"},
-  {id:8,pedido:"21992",abertura:"19/02/2026",cliente:"Sunfix",estado:"PR",vendedor:"SUNFIX",produto:"Outro",occ:"Prod. Errado",status:"Resolvido",dias:134,valor:32000,custo:0,canal:"Kommo/CRM"},
-  {id:9,pedido:"18217",abertura:"19/02/2026",cliente:"Screeny Decor",estado:"RS",vendedor:"Screeny Decor",produto:"Arkodeck E",occ:"Prod. Errado",status:"Resolvido",dias:134,valor:58940,custo:0,canal:"Kommo/CRM"},
-  {id:10,pedido:"11446",abertura:"20/02/2026",cliente:"ONE DONATELLI EMPREENDIMENTO",estado:"SP",vendedor:"BRUNA CORREA",produto:"Arkowood K",occ:"Empenamento",status:"Resolvido",dias:133,valor:67010,custo:0,canal:"Formulário SAC"},
-  {id:11,pedido:"23287",abertura:"23/02/2026",cliente:"HUGO ALBERTO SEGRE JUNIOR",estado:"SP",vendedor:"SARAH JANCOVIC",produto:"Arkowood K",occ:"Prod. Errado",status:"Em Andamento",dias:130,valor:588,custo:0,canal:"Kommo/CRM"},
-  {id:12,pedido:"19921",abertura:"23/02/2026",cliente:"CARVALHO DANTAS LELIS E PALHARIS",estado:"GO",vendedor:"STERMAAN",produto:"Arkowood K",occ:"Manchado",status:"Resolvido",dias:130,valor:30240,custo:4000,canal:"Formulário SAC"},
-  {id:13,pedido:"7728",abertura:"23/02/2026",cliente:"CARLOS HENRIQUE KAIPPER",estado:"RS",vendedor:"Screeny Decor",produto:"Arkodeck E",occ:"Desbotamento",status:"Resolvido",dias:130,valor:3730,custo:0,canal:"Formulário SAC"},
-  {id:14,pedido:"18559",abertura:"23/02/2026",cliente:"ANGELA NERLY PEREIRA",estado:"PA",vendedor:"EGYEDIO",produto:"Arkowood KP",occ:"Desbotamento",status:"Resolvido",dias:130,valor:87040,custo:0,canal:"Formulário SAC"},
-  {id:15,pedido:"16564",abertura:"27/02/2026",cliente:"SPORTCO ACADEMIA LTDA",estado:"SP",vendedor:"SAMANTHA DUTRA",produto:"Thermowood",occ:"Empenamento",status:"Em Andamento",dias:126,valor:34265,custo:1171,canal:"Formulário SAC"},
-  {id:16,pedido:"12504",abertura:"02/03/2026",cliente:"FERNANDO MENDA TORNAIM",estado:"RS",vendedor:"Screeny Decor",produto:"Arkowood K",occ:"Empenamento",status:"Aguardando Cliente",dias:123,valor:75571,custo:11250,canal:"Formulário SAC"},
-  {id:17,pedido:"9847",abertura:"03/03/2026",cliente:"MARCELO MARQUES PINHEIRO",estado:"SP",vendedor:"GUILHERME MENDES",produto:"Arkodeck E",occ:"Desbotamento",status:"Aguardando Cliente",dias:122,valor:85000,custo:0,canal:"Formulário SAC"},
-  {id:18,pedido:"22419",abertura:"17/03/2026",cliente:"GOOD VIBEH COMERCIAL DE MODA LTDA",estado:"RJ",vendedor:"RAPHIS",produto:"Arkodeck E",occ:"Garantia Outros",status:"Resolvido",dias:108,valor:56400,custo:0,canal:"Formulário SAC"},
-  {id:19,pedido:"17280",abertura:"18/03/2026",cliente:"PERFECT WAVE POOL S.A",estado:"PR",vendedor:"TADEU",produto:"Arkodeck E",occ:"Rachadura",status:"Em Andamento",dias:107,valor:215337,custo:0,canal:"Formulário SAC"},
-  {id:20,pedido:"7983",abertura:"23/03/2026",cliente:"JULIANA ELISA ALVES MARIA FELDMAN",estado:"RJ",vendedor:"RAPHIS",produto:"Arkowood EP",occ:"Desbotamento",status:"Aguardando Cliente",dias:102,valor:511779,custo:91436,canal:"Formulário SAC"},
-  {id:21,pedido:"9677",abertura:"23/03/2026",cliente:"PADARIA SABOR DE PAO LTDA",estado:"RN",vendedor:"ECOGREEN",produto:"Arkowood KP",occ:"Desbotamento",status:"Aguardando Cliente",dias:102,valor:34837,custo:0,canal:"Formulário SAC"},
-  {id:22,pedido:"8884",abertura:"23/03/2026",cliente:"LORENA FURTADO ROBERTO BURITY",estado:"PB",vendedor:"ECOGREEN",produto:"Arkowood EP",occ:"Desbotamento",status:"Aguardando Cliente",dias:102,valor:69864,custo:91971,canal:"Formulário SAC"},
-  {id:23,pedido:"1919",abertura:"23/03/2026",cliente:"(sem nome)",estado:"PE",vendedor:"ECOGREEN",produto:"Arkowood EP",occ:"Desbotamento",status:"Aguardando Cliente",dias:102,valor:0,custo:0,canal:"Formulário SAC"},
-  {id:24,pedido:"23548",abertura:"24/03/2026",cliente:"OLLA TELECON",estado:"RO",vendedor:"SOLUTIO",produto:"Arkowood ASA",occ:"Desbotamento",status:"Resolvido",dias:101,valor:13626,custo:9500,canal:"Formulário SAC"},
-  {id:25,pedido:"5748",abertura:"24/03/2026",cliente:"ADRIANA VIEIRA LUMERTZ",estado:"RS",vendedor:"Screeny Decor",produto:"Arkowood EP",occ:"Rachadura",status:"Resolvido",dias:101,valor:23946,custo:19105,canal:"Formulário SAC"},
-  {id:26,pedido:"23548",abertura:"24/03/2026",cliente:"OLLA TELECON (duplicata)",estado:"RO",vendedor:"SOLUTIO",produto:"Arkowood ASA",occ:"Desbotamento",status:"Resolvido",dias:101,valor:13626,custo:10640,canal:"Formulário SAC"},
-  {id:27,pedido:"22654",abertura:"07/04/2026",cliente:"DANIELA LIMA BARBALHO",estado:"PA",vendedor:"EGYEDIO",produto:"Arkowood E",occ:"Quebrado",status:"Resolvido",dias:87,valor:20304,custo:3809,canal:"Formulário SAC"},
-  {id:28,pedido:"10557",abertura:"07/04/2026",cliente:"ANIBAL FERREIRA MARCELINO JUNIOR",estado:"PR",vendedor:"KELY",produto:"Arkowood E",occ:"Desbotamento",status:"Resolvido",dias:87,valor:22800,custo:1700,canal:"Formulário SAC"},
-  {id:29,pedido:"18561",abertura:"09/04/2026",cliente:"RESIDENCIAL 6 SPE LTDA",estado:"SP",vendedor:"TATIANA ROCHA",produto:"Arkodeck H",occ:"Empenamento",status:"Resolvido",dias:85,valor:56650,custo:0,canal:"Formulário SAC"},
-  {id:30,pedido:"10060",abertura:"09/04/2026",cliente:"CASSIO LAMEGO BULOS",estado:"BA",vendedor:"BRUNA CORREA",produto:"Arkowood E",occ:"Empenamento",status:"Aguardando Cliente",dias:85,valor:99987,custo:0,canal:"Formulário SAC"},
-  {id:31,pedido:"4684",abertura:"10/04/2026",cliente:"MARCELO KALICHSZTEIN",estado:"RJ",vendedor:"RAPHIS",produto:"Arkowood EP",occ:"Desbotamento",status:"Aguardando Cliente",dias:84,valor:44130,custo:26130,canal:"Formulário SAC"},
-  {id:32,pedido:"7820",abertura:"10/04/2026",cliente:"JONAS ROSSI DIAS",estado:"PR",vendedor:"KELY",produto:"Equitone",occ:"Empenamento",status:"Em Andamento",dias:84,valor:155000,custo:8193,canal:"Formulário SAC"},
-  {id:33,pedido:"12226",abertura:"26/01/2026",cliente:"RODRIGO CAPITANIO",estado:"RS",vendedor:"Screeny Decor",produto:"Arkowood EP",occ:"Garantia Outros",status:"Resolvido",dias:158,valor:9186,custo:2050,canal:"Kommo/CRM"},
-  {id:34,pedido:"17583",abertura:"26/01/2026",cliente:"SERGIO LUIZ SALVADOR",estado:"SC",vendedor:"TADEU",produto:"Arkowood K",occ:"Rachadura",status:"Em Andamento",dias:158,valor:11623,custo:11623,canal:"Kommo/CRM"},
-  {id:35,pedido:"17299",abertura:"22/01/2026",cliente:"ARMANDO COURI FILHO",estado:"MG",vendedor:"BO BRASIL",produto:"Arkowood E",occ:"Prod. Errado",status:"Aguardando Cliente",dias:162,valor:79267,custo:0,canal:"Kommo/CRM"},
-  {id:36,pedido:"12549",abertura:"15/01/2026",cliente:"CONDOMINIO MORADA DE L.",estado:"MG",vendedor:"BO BRASIL",produto:"Arkowood K",occ:"Rachadura",status:"Aguardando Cliente",dias:169,valor:306845,custo:0,canal:"Kommo/CRM"},
-  {id:37,pedido:"18593",abertura:"13/01/2026",cliente:"MARIO CESAR DE LIMA ATEM JUNIOR",estado:"AM",vendedor:"SOLUTIO",produto:"Arkowood K",occ:"Empenamento",status:"Resolvido",dias:171,valor:89885,custo:1220,canal:"Kommo/CRM"},
-  {id:38,pedido:"5334",abertura:"13/04/2026",cliente:"MAINA HARBOE",estado:"MG",vendedor:"BRUNA CORREA",produto:"Arkowood EP",occ:"Empenamento",status:"Aguardando Cliente",dias:81,valor:158001,custo:0,canal:"Formulário SAC"},
-  {id:39,pedido:"17397",abertura:"13/04/2026",cliente:"JOSE MARQUES DA SILVA NETO",estado:"PE",vendedor:"ECOGREEN",produto:"",occ:"Outros",status:"Resolvido",dias:81,valor:36600,custo:29900,canal:"Formulário SAC"},
-  {id:40,pedido:"18016",abertura:"14/04/2026",cliente:"BYD DO BRASIL",estado:"SP",vendedor:"SAMANTHA DUTRA",produto:"Arkodeck H",occ:"Desbotamento",status:"Resolvido",dias:80,valor:95000,custo:0,canal:"Formulário SAC"},
-  {id:41,pedido:"6610",abertura:"20/04/2026",cliente:"IDEA QUATTRO EMPREENDIMENTOS",estado:"SC",vendedor:"INNOVATTIO - SC",produto:"Arkodeck E",occ:"Desbotamento",status:"Resolvido",dias:74,valor:16000,custo:1697,canal:"Formulário SAC"},
-  {id:42,pedido:"20842",abertura:"20/04/2026",cliente:"T5 CONSTRUTORA",estado:"SP",vendedor:"SAMANTHA DUTRA",produto:"Arkowood K",occ:"Rachadura",status:"Aguardando Cliente",dias:74,valor:60445,custo:0,canal:"Formulário SAC"},
-  {id:43,pedido:"3756",abertura:"20/04/2026",cliente:"RECLAME AQUI - MARCONI BENETTI",estado:"MG",vendedor:"MARCO AURELIO",produto:"Arkowood EP",occ:"Quebrado",status:"Resolvido",dias:74,valor:115000,custo:0,canal:"Formulário SAC"},
-  {id:44,pedido:"",abertura:"23/04/2026",cliente:"STERMAAN",estado:"GO",vendedor:"STERMAAN",produto:"Arkowood K",occ:"Rachadura",status:"Aguardando Cliente",dias:71,valor:0,custo:0,canal:"Formulário SAC"},
-  {id:45,pedido:"6001",abertura:"23/04/2026",cliente:"BRENO PENHA BORGES",estado:"GO",vendedor:"STERMAAN",produto:"Arkodeck E",occ:"Quebrado",status:"Aguardando Cliente",dias:71,valor:12240,custo:0,canal:"Formulário SAC"},
-  {id:46,pedido:"21538",abertura:"23/04/2026",cliente:"GUSTAVO CINTRA DE SOUZA",estado:"SP",vendedor:"SAMANTHA DUTRA",produto:"Arkowood ASA",occ:"Prod. Errado",status:"Resolvido",dias:71,valor:22910,custo:0,canal:"Kommo/CRM"},
-  {id:47,pedido:"6297",abertura:"04/05/2026",cliente:"FERNANDO GONZAGA PINTO",estado:"PR",vendedor:"KELY",produto:"Arkodeck E",occ:"Desbotamento",status:"Aguardando Cliente",dias:60,valor:131192,custo:0,canal:"Formulário SAC"},
-  {id:48,pedido:"11074",abertura:"04/05/2026",cliente:"PCROZARA E MJHERCULES LTDA",estado:"TO",vendedor:"DAVI",produto:"Arkowood EP",occ:"Quebrado",status:"Aguardando Cliente",dias:60,valor:7299,custo:0,canal:"Formulário SAC"},
-  {id:49,pedido:"",abertura:"07/05/2026",cliente:"Felipe Santos",estado:"SP",vendedor:"",produto:"Arkowood A",occ:"Desbotamento",status:"Aguardando Cliente",dias:57,valor:0,custo:0,canal:"Formulário SAC"},
-  {id:50,pedido:"22750",abertura:"07/05/2026",cliente:"JULIANA CORDEIRO DE FARIA",estado:"MG",vendedor:"ATRIO",produto:"Arkowood EP",occ:"Quebrado",status:"Aguardando Cliente",dias:57,valor:7742,custo:0,canal:"Formulário SAC"},
-  {id:51,pedido:"",abertura:"08/05/2026",cliente:"PRISCILLA LIMENA CASO TUMIARU",estado:"SP",vendedor:"",produto:"",occ:"Outros",status:"Em Andamento",dias:56,valor:0,custo:0,canal:"Formulário SAC"},
-  {id:52,pedido:"2425",abertura:"11/05/2025",cliente:"CAIO AUGUSTO SCOCCO",estado:"SC",vendedor:"INNOVATTIO",produto:"Arkodeck E",occ:"Rachadura",status:"Aguardando Cliente",dias:417,valor:68182,custo:0,canal:"Formulário SAC"},
-  {id:53,pedido:"20907",abertura:"11/05/2025",cliente:"GUSTAVO ROZENBAUM BCHCHE",estado:"MG",vendedor:"BO BRASIL",produto:"Arkowood X",occ:"Empenamento",status:"Resolvido",dias:417,valor:55194,custo:6182,canal:"Formulário SAC"},
-  {id:54,pedido:"7914",abertura:"19/05/2026",cliente:"Jeane Portela Track Field",estado:"PB",vendedor:"",produto:"Arkowood KP",occ:"Desbotamento",status:"Em Andamento",dias:44,valor:0,custo:0,canal:"Formulário SAC"},
-  {id:55,pedido:"11281",abertura:"20/05/2026",cliente:"Alessandra Oliveira El Khoury",estado:"SP",vendedor:"BRUNA CORREA",produto:"Arkowood KP",occ:"Desbotamento",status:"Em Andamento",dias:43,valor:27999,custo:0,canal:"Formulário SAC"},
-  {id:56,pedido:"3794",abertura:"28/05/2026",cliente:"Tamires Gasparetto",estado:"RS",vendedor:"Screeny Decor",produto:"Arkowood EP",occ:"Desbotamento",status:"Em Andamento",dias:35,valor:29634,custo:0,canal:"Formulário SAC"},
-  {id:57,pedido:"22674",abertura:"01/06/2026",cliente:"Marllon Silva Xavier",estado:"CE",vendedor:"Casa 7",produto:"Arkowood KP",occ:"Manchado",status:"Em Andamento",dias:31,valor:6551,custo:0,canal:"Formulário SAC"},
-  {id:58,pedido:"19884",abertura:"01/06/2026",cliente:"Gabriela Pedrazzoli Murilo",estado:"SP",vendedor:"MARCO AURELIO",produto:"Arkodeck E",occ:"Trincado",status:"Em Andamento",dias:31,valor:27784,custo:0,canal:"Formulário SAC"},
-  {id:59,pedido:"16868",abertura:"03/06/2026",cliente:"Paulo Eduardo Ferro Jhully",estado:"SP",vendedor:"DAVI ALVES",produto:"Arkowood K",occ:"Desbotamento",status:"Resolvido",dias:29,valor:100000,custo:0,canal:"Formulário SAC"},
-  {id:60,pedido:"22708",abertura:"05/06/2026",cliente:"CONDOMINIO ALPHAVILE PALMAS 2",estado:"TO",vendedor:"MIRIAM",produto:"Arkowood FPL",occ:"Empenamento",status:"Resolvido",dias:27,valor:0,custo:4800,canal:"Formulário SAC"},
-  {id:61,pedido:"10161",abertura:"05/06/2026",cliente:"Mariana Goes Cunha",estado:"PA",vendedor:"EGYEDIO",produto:"Arkowood EP",occ:"Desbotamento",status:"Em Andamento",dias:27,valor:441509,custo:0,canal:"Formulário SAC"},
-  {id:62,pedido:"9959",abertura:"08/06/2026",cliente:"CONDOMINIO JARDINS DO CAPIBARIBE",estado:"PE",vendedor:"ECOGREEN",produto:"Arkodeck E",occ:"Desbotamento",status:"Em Andamento",dias:24,valor:84000,custo:0,canal:"Formulário SAC"},
-  {id:63,pedido:"5766",abertura:"08/06/2026",cliente:"ASSOC EMPREEND LIFE SPA GYM",estado:"PA",vendedor:"SALLOTO",produto:"Arkodeck E",occ:"Empenamento",status:"Em Andamento",dias:24,valor:37129,custo:0,canal:"Formulário SAC"},
-  {id:64,pedido:"18341",abertura:"09/06/2026",cliente:"EDUARDO MENDES DE MENDONCA",estado:"MG",vendedor:"",produto:"Arkowood KP",occ:"Desbotamento",status:"Em Andamento",dias:23,valor:107826,custo:0,canal:"Formulário SAC"},
-  {id:65,pedido:"3691",abertura:"10/06/2026",cliente:"GABRIELA MUNARINI RAZUK",estado:"MS",vendedor:"",produto:"Arkowood EP",occ:"Desbotamento",status:"Em Andamento",dias:22,valor:180000,custo:0,canal:"Formulário SAC"},
-  {id:66,pedido:"14181",abertura:"10/06/2026",cliente:"Manutencao Cron Engenharia",estado:"SP",vendedor:"",produto:"Arkodeck E",occ:"Empenamento",status:"Em Andamento",dias:22,valor:34440,custo:0,canal:"Formulário SAC"},
-  {id:67,pedido:"16227",abertura:"12/06/2026",cliente:"ATHIE WOHLNRATH",estado:"SP",vendedor:"",produto:"Arkodeck E",occ:"Outros",status:"Em Andamento",dias:20,valor:43691,custo:0,canal:"Formulário SAC"},
-  {id:68,pedido:"14090",abertura:"15/06/2026",cliente:"Hugo Aurelio Martins de Souza",estado:"PB",vendedor:"",produto:"Arkowood KP",occ:"Empenamento",status:"Em Andamento",dias:17,valor:62000,custo:0,canal:"Formulário SAC"},
-  {id:69,pedido:"11077",abertura:"16/06/2026",cliente:"JOSE LUIZ BENTO",estado:"MS",vendedor:"",produto:"Arkowood EP",occ:"Desbotamento",status:"Em Andamento",dias:16,valor:36552,custo:0,canal:"Formulário SAC"},
-  {id:70,pedido:"11049",abertura:"18/06/2026",cliente:"CONDOMINIO LOFT BMRX",estado:"PE",vendedor:"CONTEC",produto:"Arkowood KP",occ:"Desbotamento",status:"Em Andamento",dias:14,valor:190000,custo:0,canal:"Formulário SAC"},
-  {id:71,pedido:"5806",abertura:"03/02/2026",cliente:"Renato Cesar",estado:"DF",vendedor:"STERMAAN",produto:"Arkowood EP",occ:"Desbotamento",status:"Aguardando Cliente",dias:149,valor:34837,custo:19418,canal:"Formulário SAC"},
-  {id:72,pedido:"10070",abertura:"16/05/2025",cliente:"FML Incorporadora",estado:"SC",vendedor:"ABITARE",produto:"Arkowood EPL",occ:"Empenamento",status:"Aguardando Cliente",dias:412,valor:391277,custo:83345,canal:"Formulário SAC"},
-  {id:73,pedido:"9064",abertura:"26/01/2026",cliente:"MELNICKY EVEN APUS",estado:"RS",vendedor:"SCREENYDECOR",produto:"Arkowood EP",occ:"Quebrado",status:"Aguardando Cliente",dias:157,valor:73200,custo:21100,canal:"Formulário SAC"},
-  {id:74,pedido:"1690",abertura:"06/11/2025",cliente:"ALA EMPREENDIMENTOS",estado:"SP",vendedor:"GUILHERME MENDES",produto:"Arkodeck E",occ:"Rachadura",status:"Aguardando Cliente",dias:238,valor:109500,custo:56083,canal:"Formulário SAC"},
-  {id:75,pedido:"10450",abertura:"29/06/2025",cliente:"NOVA GALLERIA",estado:"SP",vendedor:"BRUNA CORREA",produto:"Arkowood K",occ:"Rachadura",status:"Aguardando Cliente",dias:368,valor:37363,custo:37908,canal:"Formulário SAC"},
-  {id:76,pedido:"4519",abertura:"13/05/2025",cliente:"MODULADOS BOA VISTA",estado:"SP",vendedor:"MARCO AURELIO",produto:"Arkowood K",occ:"Rachadura",status:"Aguardando Cliente",dias:415,valor:35000,custo:28920,canal:"Formulário SAC"},
-  {id:77,pedido:"5007",abertura:"18/09/2025",cliente:"EMANOEL CRUZ",estado:"RS",vendedor:"SCREENYDECOR",produto:"Arkowood EP",occ:"Desbotamento",status:"Aguardando Cliente",dias:287,valor:46440,custo:0,canal:"Formulário SAC"},
-  {id:78,pedido:"12504",abertura:"05/02/2025",cliente:"FERNANDO MENDA TORNAIM 2",estado:"RS",vendedor:"SCREENYDECOR",produto:"Arkowood K",occ:"Rachadura",status:"Aguardando Cliente",dias:512,valor:75571,custo:0,canal:"Formulário SAC"}
-];
-
-var NPS = [
-  {timestamp:"25/06/2026 12:09",caso:"Cx",cliente:"Cond Exclusive Itaim",occ:"Manchado",nota:10,categoria:"Promotor",sat:5,satLabel:"Muito satisfeito",comentario:"Vcs ja fazem tudo isto muito bem. Apos 2 anos apresentou manchas e vcs vieram trazer solucoes, ainda nao aplicamos mas ja me sinto segura de que qq problema estarao por perto! Excelente equipe!! Muito bom! O que vale numa relacao e como se resolve quando os problemas chegam! Isto sim fideliza e conecta! Obrigada"}
-];
+// Dados carregados da planilha — não editar aqui
+var CASOS = [];
+var NPS   = [];
 
 // ════ ESTADO ════
 var modo = 'total', offset = 0, scol = 'id', sdir = 'asc';
@@ -456,9 +374,11 @@ var URL_NPS   = 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/export?form
 
 // ════ INIT ════
 function iniciar() {
-  buildFiltros();
-  render();
-  // Sincroniza em background automaticamente ao abrir
+  // Mostra loading enquanto busca da planilha
+  document.getElementById('kpis').innerHTML =
+    '<div style="grid-column:1/-1;text-align:center;padding:48px 0;color:var(--t3);font-size:13px">'+
+    '<div style="margin-bottom:12px;font-size:22px">⏳</div>Carregando dados da planilha...</div>';
+  document.getElementById('hsub').textContent = 'Buscando dados...';
   sincronizarSilencioso({casos:URL_CASOS, nps:URL_NPS}, false);
 }
 
@@ -906,12 +826,13 @@ function sincronizarSilencioso(u,aviso){
   }
 
   Promise.all(ps).then(function(){
+    buildFiltros();
     render();
-    if(aviso){
-      var ab=CASOS.filter(function(c){return c.status!=='Resolvido';}).length;
-      document.getElementById('hab').textContent=ab+' em aberto';
-      document.getElementById('hsub').textContent='Sincronizado agora · '+CASOS.length+' casos';
-    }
+    var ab = CASOS.filter(function(c){return c.status!=='Resolvido';}).length;
+    document.getElementById('hsub').textContent = 'Atualizado agora · '+CASOS.length+' casos';
+    document.getElementById('hres').textContent = CASOS.filter(function(c){return c.status==='Resolvido';}).length+' resolvidos';
+    document.getElementById('hab').textContent  = ab+' em aberto';
+    if(aviso) console.log('Sync concluído:', CASOS.length, 'casos,', NPS.length, 'NPS');
   });
 }
 
