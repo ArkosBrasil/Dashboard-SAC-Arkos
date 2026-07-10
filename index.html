@@ -773,47 +773,78 @@ function sincronizarSilencioso(u,aviso){
     ps.push(fetch(u.casos).then(function(r){return r.text();}).then(function(t){
       var rows=Papa.parse(t,{skipEmptyLines:true}).data;
 
-      // Detecta automaticamente a linha do cabeçalho real
-      // (a que contém "Nº Caso" ou "Nome do Cliente")
-      var headerIdx = 2; // fallback padrão
-      for(var h=0; h<Math.min(rows.length,6); h++){
-        var joined = rows[h].join('|').toLowerCase();
-        if(joined.indexOf('caso') >= 0 && joined.indexOf('cliente') >= 0){
-          headerIdx = h; break;
+      // Encontra a linha de cabeçalho real e mapeia colunas pelo NOME
+      var headerIdx=-1, hdr={};
+      for(var h=0;h<Math.min(rows.length,8);h++){
+        var joined=rows[h].join('|');
+        if(joined.indexOf('Nº Caso')>=0||joined.indexOf('N\u00ba Caso')>=0||joined.indexOf('Status')>=0){
+          headerIdx=h;
+          rows[h].forEach(function(name,i){ hdr[name.trim()]=i; });
+          break;
         }
       }
-      console.log('Header na linha', headerIdx, ':', rows[headerIdx] ? rows[headerIdx].slice(0,5) : 'N/A');
-      console.log('Primeira linha de dados:', rows[headerIdx+1] ? rows[headerIdx+1].slice(0,5) : 'N/A');
+      console.log('Header linha:',headerIdx,'Mapa:',JSON.stringify(hdr));
+      if(headerIdx<0){
+        console.warn('Header nao encontrado. Linhas 0-4:',rows.slice(0,4).map(function(r){return r.slice(0,6);}));
+        return;
+      }
+
+      // Índices dinâmicos por nome de coluna
+      function col(names,fallback){
+        for(var i=0;i<names.length;i++){ if(hdr[names[i]]!==undefined) return hdr[names[i]]; }
+        return fallback;
+      }
+      var C={
+        pedido:   col(['Nº Pedido','N° Pedido'],0),
+        caso:     col(['Nº Caso','N° Caso'],1),
+        abertura: col(['Dt. Abertura','Data de Abertura'],3),
+        cliente:  col(['Nome do Cliente','Cliente'],9),
+        estado:   col(['Estado'],10),
+        vendedor: col(['Vendedor'],11),
+        canal:    col(['Canal de Entrada','Canal'],14),
+        produto:  col(['Linha de Produto','Produto'],15),
+        occ:      col(['Tipo de Ocorrência','Ocorrência'],17),
+        status:   col(['Status'],22),
+        dias:     col(['Dias Aberto','Dias'],32),
+        valor:    col(['Valor do Pedido','Valor'],36),
+        custo:    col(['TOTAL DE CUSTOS','Total de Custos'],44)
+      };
+      console.log('Colunas:', JSON.stringify(C));
+
+      function moe(s){
+        if(!s) return 0;
+        var c=s.toString().replace(/R\$\s*/g,'').replace(/\./g,'').replace(',','.');
+        return parseFloat(c)||0;
+      }
 
       var novos=rows.slice(headerIdx+1).filter(function(r){
-        var temCaso    = r[1] && /^\d+$/.test(r[1].toString().trim());
-        var temCliente = r[9] && r[9].toString().trim().length > 2;
-        var temStatus  = r[22] && r[22].toString().trim().length > 0;
-        return temCaso || (temCliente && temStatus);
+        var temCaso    = r[C.caso]    && /^\d+$/.test(r[C.caso].toString().trim());
+        var temCliente = r[C.cliente] && r[C.cliente].toString().trim().length > 2;
+        var temStatus  = r[C.status]  && r[C.status].toString().trim().length > 0;
+        return temCaso||(temCliente&&temStatus);
       }).map(function(r){
         return {
-          id:parseInt(r[1])||0,
-          pedido:(r[0]||'').trim(),
-          abertura:(r[3]||'').trim(),
-          cliente:(r[9]||'').trim(),
-          estado:(r[10]||'').trim(),
-          vendedor:(r[11]||'').trim(),
-          canal:(r[14]||'').trim(),
-          produto:(r[15]||'').trim(),
-          occ:(r[17]||'').trim(),
-          status:(r[22]||'').trim(),
-          dias:parseInt(r[32])||0,
-          valor:moe(r[36]),
-          custo:moe(r[44])
+          id:       parseInt(r[C.caso])||0,
+          pedido:   (r[C.pedido]  ||'').trim(),
+          abertura: (r[C.abertura]||'').trim(),
+          cliente:  (r[C.cliente] ||'').trim(),
+          estado:   (r[C.estado]  ||'').trim(),
+          vendedor: (r[C.vendedor]||'').trim(),
+          canal:    (r[C.canal]   ||'').trim(),
+          produto:  (r[C.produto] ||'').trim(),
+          occ:      (r[C.occ]     ||'').trim(),
+          status:   (r[C.status]  ||'').trim(),
+          dias:     parseInt(r[C.dias])||0,
+          valor:    moe(r[C.valor]),
+          custo:    moe(r[C.custo])
         };
       }).filter(function(r){return r.status&&r.cliente;});
+
       if(novos.length>0){
         CASOS=novos; buildFiltros();
         console.log('Casos sincronizados:', novos.length);
       } else {
-        // Debug: mostra as primeiras linhas para diagnóstico
-        console.warn('SYNC: 0 casos encontrados. Primeiras 5 linhas do CSV:');
-        rows.slice(0,5).forEach(function(r,i){ console.log('Linha '+i+':', JSON.stringify(r.slice(0,5))); });
+        console.warn('0 casos. Dados linha '+(headerIdx+1)+':', rows[headerIdx+1]?rows[headerIdx+1].slice(0,8):[]);
       }
     }).catch(function(e){console.warn('Erro Casos:',e);}));
   }
