@@ -368,8 +368,8 @@ var ST_COR  = {Resolvido:'#22c55e','Em Andamento':'#3b82f6','Aguardando Cliente'
 var ST_BG   = {Resolvido:'#14532d','Em Andamento':'#1e3a5f','Aguardando Cliente':'#78350f'};
 
 // ════ URLs FIXAS — export direto, ignora filtros da planilha ════
-var URL_CASOS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSyCD0Ch6HpE3v6ncJ4kSrs2UbzkHAA-pxcWs2uww_uyFQJeVLfei1txbOS6QXSS7PTeigb5-3xVGXd/pub?gid=359881815&single=true&output=csv';
-var URL_NPS   = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSyCD0Ch6HpE3v6ncJ4kSrs2UbzkHAA-pxcWs2uww_uyFQJeVLfei1txbOS6QXSS7PTeigb5-3xVGXd/pub?gid=592890904&single=true&output=csv';
+// ← Cole aqui a URL gerada ao implantar o Apps Script (sac-api.gs)
+var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbynj9IeKPTWNvqMur5LnZ8XQUqymT1-1gbugUBLyGxgYqJoXdmMrl0vEphAHS6ltcsFqw/exec';
 
 // ════ INIT ════
 function iniciar() {
@@ -378,7 +378,7 @@ function iniciar() {
     '<div style="grid-column:1/-1;text-align:center;padding:48px 0;color:var(--t3);font-size:13px">'+
     '<div style="margin-bottom:12px;font-size:22px">⏳</div>Carregando dados da planilha...</div>';
   document.getElementById('hsub').textContent = 'Buscando dados...';
-  sincronizarSilencioso({casos:URL_CASOS, nps:URL_NPS}, false);
+  sincronizarSilencioso({}, false);
 }
 
 // ════ TABS ════
@@ -754,131 +754,37 @@ function salvarCfg(){
   var u2=document.getElementById('unps').value.trim();
   localStorage.setItem('arkos_sac_v2',JSON.stringify({casos:u1,nps:u2}));
   document.getElementById('cfg-msg').style.display='block';
-  setTimeout(function(){fecharCfg();if(u1)sincronizar();},1200);
+  setTimeout(function(){fecharCfg();sincronizar();},1200);
 }
 function sincronizar(){
-  sincronizarSilencioso({casos:URL_CASOS, nps:URL_NPS}, true);
+  sincronizarSilencioso({}, true);
 }
-function moe(s){
-  if(!s) return 0;
-  var c=s.toString().replace(/R\$\s*/g,'').replace(/\./g,'').replace(',','.');
-  return parseFloat(c)||0;
-}
-
 function sincronizarSilencioso(u,aviso){
   if(aviso) document.getElementById('hab').textContent='Sincronizando...';
-  var ps=[];
-
-  if(u.casos){
-    ps.push(fetch(u.casos).then(function(r){return r.text();}).then(function(t){
-      var rows=Papa.parse(t,{skipEmptyLines:true}).data;
-
-      // Encontra a linha de cabeçalho real e mapeia colunas pelo NOME
-      var headerIdx=-1, hdr={};
-      for(var h=0;h<Math.min(rows.length,8);h++){
-        var joined=rows[h].join('|');
-        if(joined.indexOf('Nº Caso')>=0||joined.indexOf('N\u00ba Caso')>=0||joined.indexOf('Status')>=0){
-          headerIdx=h;
-          rows[h].forEach(function(name,i){ hdr[name.trim()]=i; });
-          break;
-        }
+  fetch(APPS_SCRIPT_URL+'&t='+Date.now(), {cache:'no-store'})
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if(!data.ok){ console.warn('Apps Script erro:', data.erro); return; }
+      if(data.casos && data.casos.length>0){
+        CASOS = data.casos;
+        buildFiltros();
+        console.log('Casos:', CASOS.length);
       }
-      console.log('Header linha:',headerIdx,'Mapa:',JSON.stringify(hdr));
-      if(headerIdx<0){
-        console.warn('Header nao encontrado. Linhas 0-4:',rows.slice(0,4).map(function(r){return r.slice(0,6);}));
-        return;
+      if(data.nps && data.nps.length>0){
+        NPS = data.nps;
+        console.log('NPS:', NPS.length);
       }
-
-      // Índices dinâmicos por nome de coluna
-      function col(names,fallback){
-        for(var i=0;i<names.length;i++){ if(hdr[names[i]]!==undefined) return hdr[names[i]]; }
-        return fallback;
-      }
-      var C={
-        pedido:   col(['Nº Pedido','N° Pedido'],0),
-        caso:     col(['Nº Caso','N° Caso'],1),
-        abertura: col(['Dt. Abertura','Data de Abertura'],3),
-        cliente:  col(['Nome do Cliente','Cliente'],9),
-        estado:   col(['Estado'],10),
-        vendedor: col(['Vendedor'],11),
-        canal:    col(['Canal de Entrada','Canal'],14),
-        produto:  col(['Linha de Produto','Produto'],15),
-        occ:      col(['Tipo de Ocorrência','Ocorrência'],17),
-        status:   col(['Status'],22),
-        dias:     col(['Dias Aberto','Dias'],32),
-        valor:    col(['Valor do Pedido','Valor'],36),
-        custo:    col(['TOTAL DE CUSTOS','Total de Custos'],44)
-      };
-      console.log('Colunas:', JSON.stringify(C));
-
-      function moe(s){
-        if(!s) return 0;
-        var c=s.toString().replace(/R\$\s*/g,'').replace(/\./g,'').replace(',','.');
-        return parseFloat(c)||0;
-      }
-
-      var novos=rows.slice(headerIdx+1).filter(function(r){
-        var temCaso    = r[C.caso]    && /^\d+$/.test(r[C.caso].toString().trim());
-        var temCliente = r[C.cliente] && r[C.cliente].toString().trim().length > 2;
-        var temStatus  = r[C.status]  && r[C.status].toString().trim().length > 0;
-        return temCaso||(temCliente&&temStatus);
-      }).map(function(r){
-        return {
-          id:       parseInt(r[C.caso])||0,
-          pedido:   (r[C.pedido]  ||'').trim(),
-          abertura: (r[C.abertura]||'').trim(),
-          cliente:  (r[C.cliente] ||'').trim(),
-          estado:   (r[C.estado]  ||'').trim(),
-          vendedor: (r[C.vendedor]||'').trim(),
-          canal:    (r[C.canal]   ||'').trim(),
-          produto:  (r[C.produto] ||'').trim(),
-          occ:      (r[C.occ]     ||'').trim(),
-          status:   (r[C.status]  ||'').trim(),
-          dias:     parseInt(r[C.dias])||0,
-          valor:    moe(r[C.valor]),
-          custo:    moe(r[C.custo])
-        };
-      }).filter(function(r){return r.status&&r.cliente;});
-
-      if(novos.length>0){
-        CASOS=novos; buildFiltros();
-        console.log('Casos sincronizados:', novos.length);
-      } else {
-        console.warn('0 casos. Dados linha '+(headerIdx+1)+':', rows[headerIdx+1]?rows[headerIdx+1].slice(0,8):[]);
-      }
-    }).catch(function(e){console.warn('Erro Casos:',e);}));
-  }
-
-  if(u.nps){
-    ps.push(fetch(u.nps).then(function(r){return r.text();}).then(function(t){
-      var rows=Papa.parse(t,{skipEmptyLines:true}).data;
-      var novos=rows.slice(1).map(function(r){
-        return {
-          timestamp:(r[0]||'').trim(),
-          caso:(r[1]||'').trim(),
-          cliente:(r[2]||'').trim(),
-          occ:(r[4]||'').trim(),
-          nota:parseFloat(r[5])||0,
-          categoria:(r[6]||'').trim(),
-          sat:parseFloat(r[7])||0,
-          satLabel:(r[8]||'').trim(),
-          comentario:(r[10]||'').trim()
-        };
-      }).filter(function(r){return r.nota>0&&r.cliente;});
-      if(novos.length>0){NPS=novos;console.log('NPS OK:',novos.length);}
-    }).catch(function(e){console.warn('Erro NPS:',e);}));
-  }
-
-  Promise.all(ps).then(function(){
-    buildFiltros();
-    render();
-    var ab = CASOS.filter(function(c){return c.status!=='Resolvido';}).length;
-    document.getElementById('hsub').textContent = 'Atualizado agora · '+CASOS.length+' casos';
-    document.getElementById('hres').textContent = CASOS.filter(function(c){return c.status==='Resolvido';}).length+' resolvidos';
-    document.getElementById('hab').textContent  = ab+' em aberto';
-    if(aviso) console.log('Sync concluído:', CASOS.length, 'casos,', NPS.length, 'NPS');
-  });
+      buildFiltros();
+      render();
+      var ab=CASOS.filter(function(c){return c.status!=='Resolvido';}).length;
+      document.getElementById('hres').textContent=CASOS.filter(function(c){return c.status==='Resolvido';}).length+' resolvidos';
+      document.getElementById('hab').textContent=ab+' em aberto';
+      document.getElementById('hsub').textContent='Atualizado '+new Date().toLocaleTimeString('pt-BR')+' · '+CASOS.length+' casos';
+    })
+    .catch(function(e){ console.warn('Erro sync:', e); });
 }
+
+
 
 // Fechar modal clicando fora
 document.getElementById('overlay-cfg').addEventListener('click',function(e){if(e.target===this)fecharCfg();});
