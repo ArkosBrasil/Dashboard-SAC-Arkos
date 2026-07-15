@@ -761,7 +761,7 @@ function sincronizar(){
 }
 function sincronizarSilencioso(u,aviso){
   if(aviso) document.getElementById('hab').textContent='Sincronizando...';
-  fetch(APPS_SCRIPT_URL+'&t='+Date.now(), {cache:'no-store'})
+  fetch(APPS_SCRIPT_URL)
     .then(function(r){ return r.json(); })
     .then(function(data){
       if(!data.ok){ console.warn('Apps Script erro:', data.erro); return; }
